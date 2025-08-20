@@ -3,6 +3,7 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, Edges } from '@react-three/drei';
 import { Suspense, useRef, useEffect } from 'react';
+import * as THREE from 'three';
 
 // FPS Movement Controls (enhanced version of your existing system)
 function MovementControls() {
@@ -118,11 +119,16 @@ function BlenderGallery() {
   // Apply edges effect to all meshes in the scene
   useEffect(() => {
     scene.traverse((child) => {
-      if ((child as any).isMesh) {
+      if (child instanceof THREE.Mesh) {
         // This ensures proper rendering with edges
-        (child as any).material.polygonOffset = true;
-        (child as any).material.polygonOffsetFactor = 1;
-        (child as any).material.polygonOffsetUnits = 1;
+        if (child.material) {
+          const material = child.material as THREE.Material;
+          if ('polygonOffset' in material) {
+            (material as THREE.MeshBasicMaterial).polygonOffset = true;
+            (material as THREE.MeshBasicMaterial).polygonOffsetFactor = 1;
+            (material as THREE.MeshBasicMaterial).polygonOffsetUnits = 1;
+          }
+        }
       }
     });
   }, [scene]);
@@ -132,10 +138,11 @@ function BlenderGallery() {
       <primitive object={scene} />
       {/* Create edges for each mesh in the scene */}
       {scene.children.map((child, index) => {
-        if ((child as any).isMesh) {
+        if (child instanceof THREE.Mesh) {
+          const mesh = child as THREE.Mesh;
           return (
-            <mesh key={index} geometry={(child as any).geometry}>
-              <Edges threshold={15} color="black" linewidth={2} />
+            <mesh key={index} geometry={mesh.geometry}>
+              <Edges threshold={15} color="black" />
             </mesh>
           );
         }
