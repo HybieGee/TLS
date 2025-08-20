@@ -115,37 +115,60 @@ function MovementControls() {
 // Blender Gallery Component with Sketchbook Outlines
 function BlenderGallery() {
   const { scene } = useGLTF('/models/Gallery.glb');
-  const [meshes, setMeshes] = React.useState<THREE.Mesh[]>([]);
+  const [meshesToOutline, setMeshesToOutline] = React.useState<THREE.Mesh[]>([]);
   
-  // Find all meshes in the scene hierarchy
+  // Find all meshes and apply edges selectively
   useEffect(() => {
-    const foundMeshes: THREE.Mesh[] = [];
+    const meshes: THREE.Mesh[] = [];
+    
     scene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        foundMeshes.push(child);
-        // Clone the geometry for edges
-        child.geometry = child.geometry.clone();
+        // Check if material is black (frames)
+        const mat = child.material as THREE.MeshStandardMaterial;
+        let isBlack = false;
+        
+        if (mat && mat.color) {
+          const color = mat.color;
+          isBlack = color.r < 0.2 && color.g < 0.2 && color.b < 0.2;
+        }
+        
+        // Only add non-black meshes for outlining
+        if (!isBlack) {
+          // Clone and update world matrix for proper positioning
+          child.updateWorldMatrix(true, false);
+          meshes.push(child);
+        }
       }
     });
-    setMeshes(foundMeshes);
+    
+    setMeshesToOutline(meshes);
   }, [scene]);
   
   return (
     <>
       <primitive object={scene} />
-      {/* Create edges for ALL meshes found in the scene */}
-      {meshes.map((mesh, index) => (
-        <mesh 
-          key={index} 
-          geometry={mesh.geometry}
-          position={mesh.position}
-          rotation={mesh.rotation}
-          scale={mesh.scale}
-        >
-          <meshBasicMaterial visible={false} />
-          <Edges threshold={15} color="black" scale={1.001} />
-        </mesh>
-      ))}
+      {/* Create edges with proper world transforms */}
+      {meshesToOutline.map((mesh, index) => {
+        // Get world position, rotation, and scale
+        const worldPos = new THREE.Vector3();
+        const worldQuat = new THREE.Quaternion();
+        const worldScale = new THREE.Vector3();
+        mesh.getWorldPosition(worldPos);
+        mesh.getWorldQuaternion(worldQuat);
+        mesh.getWorldScale(worldScale);
+        
+        return (
+          <mesh
+            key={index}
+            position={worldPos}
+            quaternion={worldQuat}
+            scale={worldScale}
+          >
+            <edgesGeometry args={[mesh.geometry, 20]} />
+            <lineBasicMaterial color="black" />
+          </mesh>
+        );
+      })}
     </>
   );
 }
