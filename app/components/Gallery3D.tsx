@@ -1,8 +1,8 @@
 'use client';
 
 import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
-import { useGLTF, Edges, Text } from '@react-three/drei';
-import React, { Suspense, useRef, useEffect, useMemo } from 'react';
+import { useGLTF } from '@react-three/drei';
+import React, { Suspense, useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
 // FPS Movement Controls with Collision Detection
@@ -167,23 +167,33 @@ function MovementControls() {
   return null;
 }
 
-// Blender Gallery Component with Sketchbook Outlines
+// Blender Gallery Component with Sketchbook Outlines and Coming Soon Textures
 function BlenderGallery() {
-  const { scene, nodes } = useGLTF('/models/Gallery.glb');
+  const { scene } = useGLTF('/models/Gallery.glb');
   
-  // Clone scene to add edges
+  // Load Coming Soon texture
+  const comingSoonTexture = useLoader(THREE.TextureLoader, '/images/coming-soon.svg');
+  
+  // Clone scene to add edges and replace artwork textures
   const sceneWithEdges = React.useMemo(() => {
     const cloned = scene.clone();
     
-    // Add edges to each mesh in the cloned scene
+    // Add edges to each mesh and replace artwork textures
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // Check if this is a black frame
+        // Check if this is artwork (not a black frame)
         const mat = child.material as THREE.MeshStandardMaterial;
         if (mat && mat.color) {
           const isBlack = mat.color.r < 0.2 && mat.color.g < 0.2 && mat.color.b < 0.2;
-          // Skip black frames
-          if (isBlack) return;
+          
+          // If it's not a black frame, it's likely artwork - replace texture
+          if (!isBlack) {
+            // Clone material to avoid affecting original
+            const newMaterial = mat.clone();
+            newMaterial.map = comingSoonTexture;
+            newMaterial.needsUpdate = true;
+            child.material = newMaterial;
+          }
         }
         
         // Create edges geometry with threshold for clean lines
@@ -213,56 +223,12 @@ function BlenderGallery() {
     });
     
     return cloned;
-  }, [scene]);
+  }, [scene, comingSoonTexture]);
   
   return <primitive object={sceneWithEdges} />;
 }
 
-// Coming Soon Placeholder Component
-function ComingSoonFrame({ position, rotation = [0, 0, 0] }: {
-  position: [number, number, number];
-  rotation?: [number, number, number];
-}) {
-  return (
-    <group position={position} rotation={rotation}>
-      {/* White canvas background */}
-      <mesh position={[0, 0, 0.01]}>
-        <planeGeometry args={[2.8, 1.8]} />
-        <meshBasicMaterial color="white" />
-      </mesh>
-      {/* Coming Soon text */}
-      <Text
-        position={[0, 0.3, 0.02]}
-        fontSize={0.25}
-        color="black"
-        anchorX="center"
-        anchorY="middle"
-      >
-        COMING SOON
-      </Text>
-      {/* Subtitle */}
-      <Text
-        position={[0, -0.2, 0.02]}
-        fontSize={0.12}
-        color="#666666"
-        anchorX="center"
-        anchorY="middle"
-      >
-        Community artwork will appear here
-      </Text>
-      {/* Simple sketch border */}
-      <mesh position={[0, 0, 0.015]}>
-        <planeGeometry args={[2.7, 1.7]} />
-        <meshBasicMaterial 
-          color="black" 
-          transparent={true}
-          opacity={0.1}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-    </group>
-  );
-}
+// Your Blender model already has Coming Soon placeholders built-in!
 
 // Preload the model
 useGLTF.preload('/models/Gallery.glb');
@@ -279,19 +245,8 @@ function GalleryScene() {
       <directionalLight position={[0, 8, 0]} intensity={1.5} />
       <pointLight position={[0, 5, 0]} intensity={1.0} />
       
-      {/* Your Blender Gallery Model */}
+      {/* Your Blender Gallery Model (with built-in Coming Soon placeholders) */}
       <BlenderGallery />
-      
-      {/* Coming Soon Placeholders - adjust positions based on your model */}
-      <ComingSoonFrame position={[-11, 2, -6]} rotation={[0, Math.PI / 2, 0]} />
-      <ComingSoonFrame position={[-11, 2, -2]} rotation={[0, Math.PI / 2, 0]} />
-      <ComingSoonFrame position={[-11, 2, 2]} rotation={[0, Math.PI / 2, 0]} />
-      <ComingSoonFrame position={[-11, 2, 6]} rotation={[0, Math.PI / 2, 0]} />
-      
-      <ComingSoonFrame position={[11, 2, -6]} rotation={[0, -Math.PI / 2, 0]} />
-      <ComingSoonFrame position={[11, 2, -2]} rotation={[0, -Math.PI / 2, 0]} />
-      <ComingSoonFrame position={[11, 2, 2]} rotation={[0, -Math.PI / 2, 0]} />
-      <ComingSoonFrame position={[11, 2, 6]} rotation={[0, -Math.PI / 2, 0]} />
     </>
   );
 }

@@ -173,9 +173,15 @@ export default function CreatePage() {
           </div>
         </div>
         
-        <div className="mt-8">
+        <div className="mt-8 flex gap-4 flex-wrap">
           <Link href="/" className="px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono">
             ← Back to Gallery
+          </Link>
+          <Link href="/vote" className="px-4 py-2 border-2 border-black bg-white hover:bg-black hover:text-white text-black font-mono transition-colors">
+            ★ Vote on Characters
+          </Link>
+          <Link href="/hall" className="px-4 py-2 border-2 border-black bg-white hover:bg-black hover:text-white text-black font-mono transition-colors">
+            ♚ Hall of Fame
           </Link>
         </div>
       </div>
