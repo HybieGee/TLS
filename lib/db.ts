@@ -88,11 +88,10 @@ export async function updateSessionLastSeen(db: D1Database, sessionId: string) {
   `).bind(now, sessionId).run();
 }
 
-export function hashIP(ip: string): string {
+export async function hashIP(ip: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(ip + 'salt_living_sketchbook_2024');
-  return crypto.subtle.digest('SHA-256', data).then(hash => {
-    const bytes = new Uint8Array(hash);
-    return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
-  });
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const bytes = new Uint8Array(hash);
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
 }
