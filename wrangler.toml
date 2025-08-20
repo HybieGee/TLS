@@ -1,0 +1,30 @@
+name = "living-sketchbook"
+compatibility_date = "2025-08-01"
+
+[pages]
+build_output_dir = ".vercel/output/static"
+functions_output_dir = "functions"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sketchbook-db"
+# database_id will be set after creation
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "sketchbook-assets"
+
+[[kv_namespaces]]
+binding = "KV_SESSIONS"
+# id will be set after creation
+
+[[durable_objects.bindings]]
+name = "WorldHub"
+class_name = "WorldHubDO"
+script_name = "living-sketchbook"
+
+[vars]
+SESSION_COOKIE_NAME = "sb_session"
+
+[triggers]
+crons = ["59 * * * *"]
