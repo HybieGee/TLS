@@ -181,20 +181,11 @@ function BlenderGallery() {
     // Add edges to each mesh and replace artwork textures
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // Check if this is artwork (not a black frame)
-        const mat = child.material as THREE.MeshStandardMaterial;
-        if (mat && mat.color) {
-          const isBlack = mat.color.r < 0.2 && mat.color.g < 0.2 && mat.color.b < 0.2;
-          
-          // If it's not a black frame, it's likely artwork - replace texture
-          if (!isBlack) {
-            // Clone material to avoid affecting original
-            const newMaterial = mat.clone();
-            newMaterial.map = comingSoonTexture;
-            newMaterial.needsUpdate = true;
-            child.material = newMaterial;
-          }
-        }
+        // Debug: Log all mesh names to console to help identify artwork objects
+        console.log('Mesh name:', child.name, 'Geometry:', child.geometry.type, 'Material:', child.material?.constructor?.name);
+        
+        // For now, let's be very conservative and not apply textures until we know the right objects
+        // We'll just add edges for now
         
         // Create edges geometry with threshold for clean lines
         const edges = new THREE.EdgesGeometry(child.geometry, 30);
