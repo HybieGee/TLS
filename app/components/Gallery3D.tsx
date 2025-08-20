@@ -189,8 +189,8 @@ function BlenderGallery() {
           const mat = child.material as THREE.MeshStandardMaterial;
           const newMaterial = mat.clone();
           newMaterial.map = comingSoonTexture;
-          // Apply -90 degree rotation to texture
-          newMaterial.map.rotation = -Math.PI / 2;
+          // Apply +90 degree rotation to texture
+          newMaterial.map.rotation = Math.PI / 2;
           newMaterial.map.center.set(0.5, 0.5);
           newMaterial.needsUpdate = true;
           child.material = newMaterial;
