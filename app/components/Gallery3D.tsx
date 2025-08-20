@@ -21,10 +21,10 @@ function MovementControls() {
 
   // Simple collision check
   const checkCollision = (newPos: THREE.Vector3): boolean => {
-    // Boundaries flush with actual walls - maximum movement area
+    // X-axis back to what it was, only Z-axis changed
     const bounds = {
-      minX: -15,   // Front/back walls (with large paintings) - flush with walls
-      maxX: 15,    // Front/back walls (with large paintings) - flush with walls
+      minX: -12,   // Front/back walls (with large paintings) - BACK TO ORIGINAL
+      maxX: 12,    // Front/back walls (with large paintings) - BACK TO ORIGINAL
       minZ: -9,    // Left/right side walls (with small frames) - flush with walls
       maxZ: 9      // Left/right side walls (with small frames) - flush with walls
     };
