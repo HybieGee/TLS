@@ -5,11 +5,12 @@ import { useGLTF, Edges } from '@react-three/drei';
 import React, { Suspense, useRef, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
-// FPS Movement Controls (enhanced version of your existing system)
+// FPS Movement Controls with Collision Detection
 function MovementControls() {
-  const { camera, gl } = useThree();
+  const { camera, gl, scene } = useThree();
   const moveSpeed = 0.1;
   const lookSpeed = 0.002;
+  const playerRadius = 0.5; // Collision radius
   
   const keys = useRef({
     w: false, a: false, s: false, d: false
@@ -17,6 +18,27 @@ function MovementControls() {
   
   const mouse = useRef({ x: 0, y: 0 });
   const isPointerLocked = useRef(false);
+
+  // Simple collision check
+  const checkCollision = (newPos: THREE.Vector3): boolean => {
+    // Define gallery boundaries (adjust based on your model)
+    const bounds = {
+      minX: -11,
+      maxX: 11,
+      minZ: -24,
+      maxZ: 24
+    };
+    
+    // Check boundary collisions
+    if (newPos.x < bounds.minX + playerRadius || 
+        newPos.x > bounds.maxX - playerRadius ||
+        newPos.z < bounds.minZ + playerRadius || 
+        newPos.z > bounds.maxZ - playerRadius) {
+      return true; // Collision detected
+    }
+    
+    return false; // No collision
+  };
 
   useEffect(() => {
     const canvas = gl.domElement;
@@ -87,22 +109,31 @@ function MovementControls() {
       z: -Math.sin(camera.rotation.y)
     };
 
-    // Apply movement
+    // Store potential new position
+    const newPos = camera.position.clone();
+
+    // Apply movement to new position
     if (keys.current.w) {
-      camera.position.x += forward.x * moveSpeed;
-      camera.position.z += forward.z * moveSpeed;
+      newPos.x += forward.x * moveSpeed;
+      newPos.z += forward.z * moveSpeed;
     }
     if (keys.current.s) {
-      camera.position.x -= forward.x * moveSpeed;
-      camera.position.z -= forward.z * moveSpeed;
+      newPos.x -= forward.x * moveSpeed;
+      newPos.z -= forward.z * moveSpeed;
     }
     if (keys.current.a) {
-      camera.position.x -= right.x * moveSpeed;
-      camera.position.z -= right.z * moveSpeed;
+      newPos.x -= right.x * moveSpeed;
+      newPos.z -= right.z * moveSpeed;
     }
     if (keys.current.d) {
-      camera.position.x += right.x * moveSpeed;
-      camera.position.z += right.z * moveSpeed;
+      newPos.x += right.x * moveSpeed;
+      newPos.z += right.z * moveSpeed;
+    }
+    
+    // Only apply movement if no collision
+    if (!checkCollision(newPos)) {
+      camera.position.x = newPos.x;
+      camera.position.z = newPos.z;
     }
     
     // Keep camera at eye level
@@ -131,48 +162,27 @@ function BlenderGallery() {
           if (isBlack) return;
         }
         
-        // Create edges geometry with lower threshold for cleaner lines
-        const edges = new THREE.EdgesGeometry(child.geometry, 25);
+        // Create edges geometry with threshold for clean lines
+        const edges = new THREE.EdgesGeometry(child.geometry, 30);
         
-        // Create main line
+        // Create single line for cleaner look
         const line = new THREE.LineSegments(
           edges,
           new THREE.LineBasicMaterial({ 
             color: 'black',
-            depthTest: true,
-            opacity: 1,
-            transparent: false
+            depthTest: true
           })
         );
         
-        // Copy transforms and slightly scale up to prevent clipping
+        // Copy transforms - don't scale to keep inside lines visible
         line.position.copy(child.position);
         line.rotation.copy(child.rotation);
         line.scale.copy(child.scale);
-        line.scale.multiplyScalar(1.002); // Slight scale to push edges out
         line.renderOrder = 1; // Render after meshes
         
-        // Create second line slightly larger for thicker appearance
-        const line2 = new THREE.LineSegments(
-          edges,
-          new THREE.LineBasicMaterial({ 
-            color: '#111111',
-            depthTest: true,
-            opacity: 0.5,
-            transparent: true
-          })
-        );
-        
-        line2.position.copy(child.position);
-        line2.rotation.copy(child.rotation);
-        line2.scale.copy(child.scale);
-        line2.scale.multiplyScalar(1.003); // Slightly larger scale
-        line2.renderOrder = 2;
-        
-        // Add both lines to parent
+        // Add line to parent
         if (child.parent) {
           child.parent.add(line);
-          child.parent.add(line2);
         }
       }
     });
