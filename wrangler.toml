@@ -2,7 +2,7 @@ name = "living-sketchbook"
 compatibility_date = "2025-08-01"
 
 [pages]
-build_output_dir = ".vercel/output/static"
+compatibility_flags = ["nodejs_compat"]
 functions_output_dir = "functions"
 
 [[d1_databases]]
