@@ -1,5 +1,10 @@
 // Database utilities for D1
-import { D1Database } from '@cloudflare/workers-types';
+import type { 
+  D1Database, 
+  R2Bucket, 
+  KVNamespace, 
+  DurableObjectNamespace 
+} from '@cloudflare/workers-types';
 
 export interface Env {
   DB: D1Database;
