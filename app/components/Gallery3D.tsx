@@ -132,9 +132,10 @@ function GalleryScene() {
     <>
       <MovementControls />
       
-      {/* Lighting setup for sketchbook feel */}
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[5, 8, 5]} intensity={1} castShadow />
+      {/* Bright lighting for clean white sketchbook feel */}
+      <ambientLight intensity={1.2} />
+      <directionalLight position={[5, 8, 5]} intensity={1.5} castShadow />
+      <directionalLight position={[-5, 8, -5]} intensity={0.8} />
       
       {/* Your Blender Gallery Model */}
       <BlenderGallery />
