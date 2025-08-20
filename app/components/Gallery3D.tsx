@@ -1,10 +1,10 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
+import { useGLTF, Edges } from '@react-three/drei';
 import { Suspense, useRef, useEffect } from 'react';
 
-// Proper FPS Movement Controls
+// FPS Movement Controls (enhanced version of your existing system)
 function MovementControls() {
   const { camera, gl } = useThree();
   const moveSpeed = 0.1;
@@ -111,46 +111,15 @@ function MovementControls() {
   return null;
 }
 
-// Sketch-style Material Component
-function SketchMaterial({ color = "white", wireframe = false }) {
+// Blender Gallery Component with Sketchbook Outlines
+function BlenderGallery(props: any) {
+  const { scene } = useGLTF('/models/gallery.glb');
+  
   return (
-    <meshBasicMaterial 
-      color={color}
-      wireframe={wireframe}
-      transparent={color === "white"}
-      opacity={color === "white" ? 0.95 : 1.0}
-    />
-  );
-}
-
-// Picture Frame Component
-function PictureFrame({ position, rotation = [0, 0, 0], text }: { 
-  position: [number, number, number]; 
-  rotation?: [number, number, number];
-  text: string;
-}) {
-  return (
-    <group position={position} rotation={rotation}>
-      {/* Black Frame Border */}
-      <mesh position={[0, 0, 0.02]}>
-        <boxGeometry args={[3.2, 2.2, 0.1]} />
-        <SketchMaterial color="black" />
-      </mesh>
-      {/* White Paper/Canvas */}
-      <mesh position={[0, 0, 0.05]}>
-        <planeGeometry args={[2.8, 1.8]} />
-        <SketchMaterial color="white" />
-      </mesh>
-      {/* Sketch-style text */}
-      <Text
-        position={[0, 0, 0.06]}
-        fontSize={0.15}
-        color="black"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {text}
-      </Text>
+    <group {...props} dispose={null}>
+      <primitive object={scene} />
+      {/* Sketchbook outlines: draws black edges around geometry */}
+      <Edges threshold={15} color="black" />
     </group>
   );
 }
@@ -160,68 +129,12 @@ function GalleryScene() {
     <>
       <MovementControls />
       
-      {/* Simple ambient lighting for sketch effect */}
-      <ambientLight intensity={1.0} />
+      {/* Lighting setup for sketchbook feel */}
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[5, 8, 5]} intensity={1} castShadow />
       
-      {/* Clean white floor - like paper */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
-        <planeGeometry args={[50, 50]} />
-        <SketchMaterial color="white" />
-      </mesh>
-      
-      {/* Left Wall - clean white like sketchbook page */}
-      <mesh position={[-12, 2, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <planeGeometry args={[50, 8]} />
-        <SketchMaterial color="white" />
-      </mesh>
-      
-      {/* Right Wall */}
-      <mesh position={[12, 2, 0]} rotation={[0, -Math.PI / 2, 0]}>
-        <planeGeometry args={[50, 8]} />
-        <SketchMaterial color="white" />
-      </mesh>
-      
-      {/* Back Wall */}
-      <mesh position={[0, 2, -25]} rotation={[0, 0, 0]}>
-        <planeGeometry args={[50, 8]} />
-        <SketchMaterial color="white" />
-      </mesh>
-      
-      {/* Ceiling - subtle sketch lines */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 6, 0]}>
-        <planeGeometry args={[50, 50]} />
-        <SketchMaterial color="white" wireframe={true} />
-      </mesh>
-      
-      {/* Left Wall Frames */}
-      <PictureFrame position={[-11.8, 2, -8]} rotation={[0, Math.PI / 2, 0]} text="Coming Soon..." />
-      <PictureFrame position={[-11.8, 2, -4]} rotation={[0, Math.PI / 2, 0]} text="Your Art Here" />
-      <PictureFrame position={[-11.8, 2, 0]} rotation={[0, Math.PI / 2, 0]} text="Gallery" />
-      <PictureFrame position={[-11.8, 2, 4]} rotation={[0, Math.PI / 2, 0]} text="Sketch" />
-      <PictureFrame position={[-11.8, 2, 8]} rotation={[0, Math.PI / 2, 0]} text="Create" />
-      
-      {/* Right Wall Frames */}
-      <PictureFrame position={[11.8, 2, -8]} rotation={[0, -Math.PI / 2, 0]} text="Vote Now" />
-      <PictureFrame position={[11.8, 2, -4]} rotation={[0, -Math.PI / 2, 0]} text="Hall of Fame" />
-      <PictureFrame position={[11.8, 2, 0]} rotation={[0, -Math.PI / 2, 0]} text="Winners" />
-      <PictureFrame position={[11.8, 2, 4]} rotation={[0, -Math.PI / 2, 0]} text="Community" />
-      <PictureFrame position={[11.8, 2, 8]} rotation={[0, -Math.PI / 2, 0]} text="Live Art" />
-      
-      {/* Simple black lines on floor for perspective - like sketch guidelines */}
-      <group>
-        <mesh position={[0, -0.99, 0]}>
-          <boxGeometry args={[0.02, 0.01, 50]} />
-          <SketchMaterial color="black" />
-        </mesh>
-        <mesh position={[-6, -0.99, 0]}>
-          <boxGeometry args={[0.01, 0.01, 50]} />
-          <SketchMaterial color="black" />
-        </mesh>
-        <mesh position={[6, -0.99, 0]}>
-          <boxGeometry args={[0.01, 0.01, 50]} />
-          <SketchMaterial color="black" />
-        </mesh>
-      </group>
+      {/* Your Blender Gallery Model */}
+      <BlenderGallery />
     </>
   );
 }
@@ -229,8 +142,9 @@ function GalleryScene() {
 export default function Gallery3D() {
   return (
     <Canvas
-      camera={{ position: [0, 1.6, 12], fov: 75 }}
+      camera={{ position: [0, 1.6, 6], fov: 60 }}
       style={{ background: '#ffffff' }}
+      shadows
     >
       <Suspense fallback={null}>
         <GalleryScene />
