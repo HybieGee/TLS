@@ -21,12 +21,12 @@ function MovementControls() {
 
   // Simple collision check
   const checkCollision = (newPos: THREE.Vector3): boolean => {
-    // Define gallery boundaries (adjust based on your model)
+    // More restrictive gallery boundaries for updated model
     const bounds = {
-      minX: -11,
-      maxX: 11,
-      minZ: -24,
-      maxZ: 24
+      minX: -8,    // Tighter side walls
+      maxX: 8,     // Tighter side walls
+      minZ: -20,   // Front wall
+      maxZ: 20     // Back wall
     };
     
     // Check boundary collisions
