@@ -109,31 +109,55 @@ function MovementControls() {
       z: -Math.sin(camera.rotation.y)
     };
 
-    // Store potential new position
-    const newPos = camera.position.clone();
+    // Calculate movement directions
+    let deltaX = 0;
+    let deltaZ = 0;
 
-    // Apply movement to new position
     if (keys.current.w) {
-      newPos.x += forward.x * moveSpeed;
-      newPos.z += forward.z * moveSpeed;
+      deltaX += forward.x * moveSpeed;
+      deltaZ += forward.z * moveSpeed;
     }
     if (keys.current.s) {
-      newPos.x -= forward.x * moveSpeed;
-      newPos.z -= forward.z * moveSpeed;
+      deltaX -= forward.x * moveSpeed;
+      deltaZ -= forward.z * moveSpeed;
     }
     if (keys.current.a) {
-      newPos.x -= right.x * moveSpeed;
-      newPos.z -= right.z * moveSpeed;
+      deltaX -= right.x * moveSpeed;
+      deltaZ -= right.z * moveSpeed;
     }
     if (keys.current.d) {
-      newPos.x += right.x * moveSpeed;
-      newPos.z += right.z * moveSpeed;
+      deltaX += right.x * moveSpeed;
+      deltaZ += right.z * moveSpeed;
     }
+
+    // Try movement with wall sliding
+    const currentPos = camera.position.clone();
     
-    // Only apply movement if no collision
+    // Try moving on both axes
+    const newPos = currentPos.clone();
+    newPos.x += deltaX;
+    newPos.z += deltaZ;
+    
     if (!checkCollision(newPos)) {
+      // No collision, move normally
       camera.position.x = newPos.x;
       camera.position.z = newPos.z;
+    } else {
+      // Collision detected, try sliding along walls
+      
+      // Try X-axis only (slide along Z walls)
+      const xOnlyPos = currentPos.clone();
+      xOnlyPos.x += deltaX;
+      if (!checkCollision(xOnlyPos)) {
+        camera.position.x = xOnlyPos.x;
+      }
+      
+      // Try Z-axis only (slide along X walls)
+      const zOnlyPos = currentPos.clone();
+      zOnlyPos.z += deltaZ;
+      if (!checkCollision(zOnlyPos)) {
+        camera.position.z = zOnlyPos.z;
+      }
     }
     
     // Keep camera at eye level
