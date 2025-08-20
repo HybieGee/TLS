@@ -237,7 +237,6 @@ function ComingSoonFrame({ position, rotation = [0, 0, 0] }: {
         color="black"
         anchorX="center"
         anchorY="middle"
-        font-weight="bold"
       >
         COMING SOON
       </Text>
