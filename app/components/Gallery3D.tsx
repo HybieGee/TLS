@@ -1,7 +1,7 @@
 'use client';
 
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, Edges } from '@react-three/drei';
+import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
+import { useGLTF, Edges, Text } from '@react-three/drei';
 import React, { Suspense, useRef, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
@@ -218,6 +218,53 @@ function BlenderGallery() {
   return <primitive object={sceneWithEdges} />;
 }
 
+// Coming Soon Placeholder Component
+function ComingSoonFrame({ position, rotation = [0, 0, 0] }: {
+  position: [number, number, number];
+  rotation?: [number, number, number];
+}) {
+  return (
+    <group position={position} rotation={rotation}>
+      {/* White canvas background */}
+      <mesh position={[0, 0, 0.01]}>
+        <planeGeometry args={[2.8, 1.8]} />
+        <meshBasicMaterial color="white" />
+      </mesh>
+      {/* Coming Soon text */}
+      <Text
+        position={[0, 0.3, 0.02]}
+        fontSize={0.25}
+        color="black"
+        anchorX="center"
+        anchorY="middle"
+        font-weight="bold"
+      >
+        COMING SOON
+      </Text>
+      {/* Subtitle */}
+      <Text
+        position={[0, -0.2, 0.02]}
+        fontSize={0.12}
+        color="#666666"
+        anchorX="center"
+        anchorY="middle"
+      >
+        Community artwork will appear here
+      </Text>
+      {/* Simple sketch border */}
+      <mesh position={[0, 0, 0.015]}>
+        <planeGeometry args={[2.7, 1.7]} />
+        <meshBasicMaterial 
+          color="black" 
+          transparent={true}
+          opacity={0.1}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
+  );
+}
+
 // Preload the model
 useGLTF.preload('/models/Gallery.glb');
 
@@ -235,6 +282,17 @@ function GalleryScene() {
       
       {/* Your Blender Gallery Model */}
       <BlenderGallery />
+      
+      {/* Coming Soon Placeholders - adjust positions based on your model */}
+      <ComingSoonFrame position={[-11, 2, -6]} rotation={[0, Math.PI / 2, 0]} />
+      <ComingSoonFrame position={[-11, 2, -2]} rotation={[0, Math.PI / 2, 0]} />
+      <ComingSoonFrame position={[-11, 2, 2]} rotation={[0, Math.PI / 2, 0]} />
+      <ComingSoonFrame position={[-11, 2, 6]} rotation={[0, Math.PI / 2, 0]} />
+      
+      <ComingSoonFrame position={[11, 2, -6]} rotation={[0, -Math.PI / 2, 0]} />
+      <ComingSoonFrame position={[11, 2, -2]} rotation={[0, -Math.PI / 2, 0]} />
+      <ComingSoonFrame position={[11, 2, 2]} rotation={[0, -Math.PI / 2, 0]} />
+      <ComingSoonFrame position={[11, 2, 6]} rotation={[0, -Math.PI / 2, 0]} />
     </>
   );
 }
