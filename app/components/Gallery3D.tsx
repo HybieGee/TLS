@@ -181,11 +181,20 @@ function BlenderGallery() {
     // Add edges to each mesh and replace artwork textures
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // Debug: Log all mesh names to console to help identify artwork objects
-        console.log('Mesh name:', child.name, 'Geometry:', child.geometry.type, 'Material:', child.material?.constructor?.name);
+        // Target specific artwork objects by name
+        const artworkNames = ['ArtWork', 'ArtWork001', 'ArtWork002', 'ArtWork003', 'ArtWork004', 'ArtWork005'];
         
-        // For now, let's be very conservative and not apply textures until we know the right objects
-        // We'll just add edges for now
+        if (artworkNames.includes(child.name)) {
+          // Clone material to avoid affecting original
+          const mat = child.material as THREE.MeshStandardMaterial;
+          const newMaterial = mat.clone();
+          newMaterial.map = comingSoonTexture;
+          // Apply -90 degree rotation to texture
+          newMaterial.map.rotation = -Math.PI / 2;
+          newMaterial.map.center.set(0.5, 0.5);
+          newMaterial.needsUpdate = true;
+          child.material = newMaterial;
+        }
         
         // Create edges geometry with threshold for clean lines
         const edges = new THREE.EdgesGeometry(child.geometry, 30);
