@@ -112,11 +112,11 @@ function MovementControls() {
 }
 
 // Blender Gallery Component with Sketchbook Outlines
-function BlenderGallery(props: any) {
+function BlenderGallery() {
   const { scene } = useGLTF('/models/Gallery.glb');
   
   return (
-    <group {...props} dispose={null}>
+    <group dispose={null}>
       <primitive object={scene} />
       {/* Sketchbook outlines: draws black edges around geometry */}
       <Edges threshold={15} color="black" />
