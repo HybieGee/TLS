@@ -226,11 +226,12 @@ function GalleryScene() {
     <>
       <MovementControls />
       
-      {/* Even brighter lighting for pure white sketchbook feel */}
-      <ambientLight intensity={1.5} />
-      <directionalLight position={[5, 8, 5]} intensity={2.0} castShadow />
-      <directionalLight position={[-5, 8, -5]} intensity={1.2} />
-      <pointLight position={[0, 5, 0]} intensity={0.5} />
+      {/* Maximum brightness for pure white gallery */}
+      <ambientLight intensity={2.5} />
+      <directionalLight position={[5, 8, 5]} intensity={3.0} castShadow />
+      <directionalLight position={[-5, 8, -5]} intensity={2.0} />
+      <directionalLight position={[0, 8, 0]} intensity={1.5} />
+      <pointLight position={[0, 5, 0]} intensity={1.0} />
       
       {/* Your Blender Gallery Model */}
       <BlenderGallery />
