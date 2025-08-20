@@ -8,7 +8,7 @@ functions_output_dir = "functions"
 [[d1_databases]]
 binding = "DB"
 database_name = "sketchbook-db"
-# database_id will be set after creation
+database_id = "551d4368-139d-4a84-bf90-609b7b8fae3e"
 
 [[r2_buckets]]
 binding = "R2"
@@ -16,7 +16,7 @@ bucket_name = "sketchbook-assets"
 
 [[kv_namespaces]]
 binding = "KV_SESSIONS"
-# id will be set after creation
+id = "9167733127d44c968545b4d173a54ccf"
 
 [[durable_objects.bindings]]
 name = "WorldHub"
