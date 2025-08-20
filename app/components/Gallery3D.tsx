@@ -4,7 +4,6 @@ import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import React, { Suspense, useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import AnimatedSprite from './AnimatedSprite';
 
 // FPS Movement Controls with Collision Detection
 function MovementControls() {
@@ -248,13 +247,6 @@ function GalleryScene() {
       
       {/* Your Blender Gallery Model (with built-in Coming Soon placeholders) */}
       <BlenderGallery />
-      
-      {/* Animated Sketchbook Character */}
-      <AnimatedSprite 
-        position={[0, 1, 0]} 
-        scale={1.5}
-        speed={1.5}
-      />
     </>
   );
 }
