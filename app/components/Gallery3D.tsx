@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, Edges } from '@react-three/drei';
-import React, { Suspense, useRef, useEffect } from 'react';
+import React, { Suspense, useRef, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
 // FPS Movement Controls (enhanced version of your existing system)
@@ -114,63 +114,46 @@ function MovementControls() {
 
 // Blender Gallery Component with Sketchbook Outlines
 function BlenderGallery() {
-  const { scene } = useGLTF('/models/Gallery.glb');
-  const [meshesToOutline, setMeshesToOutline] = React.useState<THREE.Mesh[]>([]);
+  const { scene, nodes } = useGLTF('/models/Gallery.glb');
   
-  // Find all meshes and apply edges selectively
-  useEffect(() => {
-    const meshes: THREE.Mesh[] = [];
+  // Clone scene to add edges
+  const sceneWithEdges = React.useMemo(() => {
+    const cloned = scene.clone();
     
-    scene.traverse((child) => {
+    // Add edges to each mesh in the cloned scene
+    cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // Check if material is black (frames)
+        // Check if this is a black frame
         const mat = child.material as THREE.MeshStandardMaterial;
-        let isBlack = false;
-        
         if (mat && mat.color) {
-          const color = mat.color;
-          isBlack = color.r < 0.2 && color.g < 0.2 && color.b < 0.2;
+          const isBlack = mat.color.r < 0.2 && mat.color.g < 0.2 && mat.color.b < 0.2;
+          // Skip black frames
+          if (isBlack) return;
         }
         
-        // Only add non-black meshes for outlining
-        if (!isBlack) {
-          // Clone and update world matrix for proper positioning
-          child.updateWorldMatrix(true, false);
-          meshes.push(child);
+        // Create edges geometry
+        const edges = new THREE.EdgesGeometry(child.geometry, 30);
+        const line = new THREE.LineSegments(
+          edges,
+          new THREE.LineBasicMaterial({ color: 'black', linewidth: 2 })
+        );
+        
+        // Copy transforms
+        line.position.copy(child.position);
+        line.rotation.copy(child.rotation);
+        line.scale.copy(child.scale);
+        
+        // Add edges to parent
+        if (child.parent) {
+          child.parent.add(line);
         }
       }
     });
     
-    setMeshesToOutline(meshes);
+    return cloned;
   }, [scene]);
   
-  return (
-    <>
-      <primitive object={scene} />
-      {/* Create edges with proper world transforms */}
-      {meshesToOutline.map((mesh, index) => {
-        // Get world position, rotation, and scale
-        const worldPos = new THREE.Vector3();
-        const worldQuat = new THREE.Quaternion();
-        const worldScale = new THREE.Vector3();
-        mesh.getWorldPosition(worldPos);
-        mesh.getWorldQuaternion(worldQuat);
-        mesh.getWorldScale(worldScale);
-        
-        return (
-          <mesh
-            key={index}
-            position={worldPos}
-            quaternion={worldQuat}
-            scale={worldScale}
-          >
-            <edgesGeometry args={[mesh.geometry, 20]} />
-            <lineBasicMaterial color="black" />
-          </mesh>
-        );
-      })}
-    </>
-  );
+  return <primitive object={sceneWithEdges} />;
 }
 
 // Preload the model
