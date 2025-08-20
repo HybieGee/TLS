@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function CreatePage() {
   return (
     <div className="min-h-screen bg-white p-8">
@@ -49,9 +51,9 @@ export default function CreatePage() {
         </div>
         
         <div className="mt-8">
-          <a href="/" className="px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono">
+          <Link href="/" className="px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono">
             ← Back to Gallery
-          </a>
+          </Link>
         </div>
       </div>
     </div>

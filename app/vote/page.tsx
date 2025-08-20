@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function VotePage() {
   return (
     <div className="min-h-screen bg-white p-8">
@@ -17,7 +19,7 @@ export default function VotePage() {
             🗳️ Voting system coming soon...
           </p>
           <p className="font-mono text-sm text-gray-600">
-            This will show all submitted characters for this hour's voting period.<br/>
+            This will show all submitted characters for this hour&apos;s voting period.<br/>
             Community votes determine which character comes to life in the gallery!
           </p>
         </div>
@@ -46,9 +48,9 @@ export default function VotePage() {
         </div>
         
         <div className="mt-8">
-          <a href="/" className="px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono">
+          <Link href="/" className="px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono">
             ← Back to Gallery
-          </a>
+          </Link>
         </div>
       </div>
     </div>

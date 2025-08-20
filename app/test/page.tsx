@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function TestPage() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
@@ -9,12 +11,12 @@ export default function TestPage() {
           The Living Sketchbook is coming together on Cloudflare Pages
         </p>
         <div className="space-x-4">
-          <a href="/" className="px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono">
+          <Link href="/" className="px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono">
             ← Back to Gallery
-          </a>
-          <a href="/create" className="px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono">
+          </Link>
+          <Link href="/create" className="px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono">
             Create →
-          </a>
+          </Link>
         </div>
       </div>
     </div>

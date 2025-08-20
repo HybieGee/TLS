@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { Suspense } from 'react';
 
 // Dynamically import the 3D scene to avoid SSR issues
@@ -30,15 +31,15 @@ export default function HomePage() {
       
       {/* Navigation Menu */}
       <div className="absolute top-4 right-4 z-10 space-y-2">
-        <a href="/create" className="block px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono text-sm">
+        <Link href="/create" className="block px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono text-sm">
           Create
-        </a>
-        <a href="/vote" className="block px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono text-sm">
+        </Link>
+        <Link href="/vote" className="block px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono text-sm">
           Vote
-        </a>
-        <a href="/hall" className="block px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono text-sm">
+        </Link>
+        <Link href="/hall" className="block px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono text-sm">
           Hall of Fame
-        </a>
+        </Link>
       </div>
     </div>
   );
