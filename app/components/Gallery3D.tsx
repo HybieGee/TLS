@@ -131,21 +131,48 @@ function BlenderGallery() {
           if (isBlack) return;
         }
         
-        // Create edges geometry
-        const edges = new THREE.EdgesGeometry(child.geometry, 30);
+        // Create edges geometry with lower threshold for cleaner lines
+        const edges = new THREE.EdgesGeometry(child.geometry, 25);
+        
+        // Create main line
         const line = new THREE.LineSegments(
           edges,
-          new THREE.LineBasicMaterial({ color: 'black', linewidth: 2 })
+          new THREE.LineBasicMaterial({ 
+            color: 'black',
+            depthTest: true,
+            opacity: 1,
+            transparent: false
+          })
         );
         
-        // Copy transforms
+        // Copy transforms and slightly scale up to prevent clipping
         line.position.copy(child.position);
         line.rotation.copy(child.rotation);
         line.scale.copy(child.scale);
+        line.scale.multiplyScalar(1.002); // Slight scale to push edges out
+        line.renderOrder = 1; // Render after meshes
         
-        // Add edges to parent
+        // Create second line slightly larger for thicker appearance
+        const line2 = new THREE.LineSegments(
+          edges,
+          new THREE.LineBasicMaterial({ 
+            color: '#111111',
+            depthTest: true,
+            opacity: 0.5,
+            transparent: true
+          })
+        );
+        
+        line2.position.copy(child.position);
+        line2.rotation.copy(child.rotation);
+        line2.scale.copy(child.scale);
+        line2.scale.multiplyScalar(1.003); // Slightly larger scale
+        line2.renderOrder = 2;
+        
+        // Add both lines to parent
         if (child.parent) {
           child.parent.add(line);
+          child.parent.add(line2);
         }
       }
     });
