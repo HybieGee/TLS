@@ -1,18 +1,26 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Text, OrbitControls } from '@react-three/drei';
+import { Text } from '@react-three/drei';
 import { Suspense, useRef, useEffect } from 'react';
 
-// Simple WASD Movement Controls
+// Proper FPS Movement Controls
 function MovementControls() {
-  const { camera } = useThree();
-  const moveSpeed = 0.2;
+  const { camera, gl } = useThree();
+  const moveSpeed = 0.1;
+  const lookSpeed = 0.002;
+  
   const keys = useRef({
     w: false, a: false, s: false, d: false
   });
+  
+  const mouse = useRef({ x: 0, y: 0 });
+  const isPointerLocked = useRef(false);
 
   useEffect(() => {
+    const canvas = gl.domElement;
+
+    // Keyboard controls
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
       if (key in keys.current) {
@@ -27,36 +35,77 @@ function MovementControls() {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    // Pointer lock for mouse look
+    const handleClick = () => {
+      canvas.requestPointerLock();
+    };
+
+    const handlePointerLockChange = () => {
+      isPointerLocked.current = document.pointerLockElement === canvas;
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+      if (isPointerLocked.current) {
+        mouse.current.x += event.movementX * lookSpeed;
+        mouse.current.y += event.movementY * lookSpeed;
+        
+        // Limit vertical look
+        mouse.current.y = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, mouse.current.y));
+      }
+    };
+
+    canvas.addEventListener('click', handleClick);
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      canvas.removeEventListener('click', handleClick);
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [gl, lookSpeed]);
 
   useFrame(() => {
-    // Simple movement based on camera rotation
+    // Apply mouse look
+    camera.rotation.y = -mouse.current.x;
+    camera.rotation.x = -mouse.current.y;
+    camera.rotation.order = 'YXZ';
+
+    // Calculate movement directions based on camera rotation
+    const forward = {
+      x: -Math.sin(camera.rotation.y),
+      z: -Math.cos(camera.rotation.y)
+    };
+    
+    const right = {
+      x: Math.cos(camera.rotation.y),
+      z: -Math.sin(camera.rotation.y)
+    };
+
+    // Apply movement
     if (keys.current.w) {
-      camera.position.z -= moveSpeed * Math.cos(camera.rotation.y);
-      camera.position.x -= moveSpeed * Math.sin(camera.rotation.y);
+      camera.position.x += forward.x * moveSpeed;
+      camera.position.z += forward.z * moveSpeed;
     }
     if (keys.current.s) {
-      camera.position.z += moveSpeed * Math.cos(camera.rotation.y);
-      camera.position.x += moveSpeed * Math.sin(camera.rotation.y);
+      camera.position.x -= forward.x * moveSpeed;
+      camera.position.z -= forward.z * moveSpeed;
     }
     if (keys.current.a) {
-      camera.position.x -= moveSpeed * Math.cos(camera.rotation.y);
-      camera.position.z += moveSpeed * Math.sin(camera.rotation.y);
+      camera.position.x -= right.x * moveSpeed;
+      camera.position.z -= right.z * moveSpeed;
     }
     if (keys.current.d) {
-      camera.position.x += moveSpeed * Math.cos(camera.rotation.y);
-      camera.position.z -= moveSpeed * Math.sin(camera.rotation.y);
+      camera.position.x += right.x * moveSpeed;
+      camera.position.z += right.z * moveSpeed;
     }
     
-    // Keep camera at reasonable height
-    camera.position.y = Math.max(0.5, Math.min(4, camera.position.y));
+    // Keep camera at eye level
+    camera.position.y = 1.6;
   });
 
   return null;
@@ -185,14 +234,6 @@ export default function Gallery3D() {
     >
       <Suspense fallback={null}>
         <GalleryScene />
-        <OrbitControls 
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          maxPolarAngle={Math.PI / 2}
-          minDistance={3}
-          maxDistance={20}
-        />
       </Suspense>
     </Canvas>
   );

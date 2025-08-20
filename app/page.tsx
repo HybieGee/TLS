@@ -26,8 +26,8 @@ export default function HomePage() {
         <div className="border-t-2 border-black pt-2">
           <p className="text-xs font-mono text-black leading-relaxed">
             → Community-voted characters come to life every hour<br/>
-            → WASD to move • Mouse to look around<br/>
-            → Click frames to explore submissions
+            → Click canvas to lock mouse • WASD to move<br/>
+            → ESC to unlock • Click frames to explore
           </p>
         </div>
       </div>
