@@ -21,12 +21,12 @@ function MovementControls() {
 
   // Simple collision check
   const checkCollision = (newPos: THREE.Vector3): boolean => {
-    // Front/back perfect, side walls need to be tighter
+    // Front/back perfect, side walls need to allow MORE movement (bigger boundaries)
     const bounds = {
       minX: -12,   // Front/back walls (with large paintings) - PERFECT, don't change
       maxX: 12,    // Front/back walls (with large paintings) - PERFECT, don't change
-      minZ: -5.5,  // Left/right side walls (with small frames) - tighter to prevent escape
-      maxZ: 5.5    // Left/right side walls (with small frames) - tighter to prevent escape
+      minZ: -7.5,  // Left/right side walls (with small frames) - BIGGER boundaries = more room to move
+      maxZ: 7.5    // Left/right side walls (with small frames) - BIGGER boundaries = more room to move
     };
     
     // Check boundary collisions
