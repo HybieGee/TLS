@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, Edges } from '@react-three/drei';
-import { Suspense, useRef, useEffect } from 'react';
+import React, { Suspense, useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
 // FPS Movement Controls (enhanced version of your existing system)
@@ -115,39 +115,37 @@ function MovementControls() {
 // Blender Gallery Component with Sketchbook Outlines
 function BlenderGallery() {
   const { scene } = useGLTF('/models/Gallery.glb');
+  const [meshes, setMeshes] = React.useState<THREE.Mesh[]>([]);
   
-  // Apply edges effect to all meshes in the scene
+  // Find all meshes in the scene hierarchy
   useEffect(() => {
+    const foundMeshes: THREE.Mesh[] = [];
     scene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // This ensures proper rendering with edges
-        if (child.material) {
-          const material = child.material as THREE.Material;
-          if ('polygonOffset' in material) {
-            (material as THREE.MeshBasicMaterial).polygonOffset = true;
-            (material as THREE.MeshBasicMaterial).polygonOffsetFactor = 1;
-            (material as THREE.MeshBasicMaterial).polygonOffsetUnits = 1;
-          }
-        }
+        foundMeshes.push(child);
+        // Clone the geometry for edges
+        child.geometry = child.geometry.clone();
       }
     });
+    setMeshes(foundMeshes);
   }, [scene]);
   
   return (
     <>
       <primitive object={scene} />
-      {/* Create edges for each mesh in the scene */}
-      {scene.children.map((child, index) => {
-        if (child instanceof THREE.Mesh) {
-          const mesh = child as THREE.Mesh;
-          return (
-            <mesh key={index} geometry={mesh.geometry}>
-              <Edges threshold={15} color="black" />
-            </mesh>
-          );
-        }
-        return null;
-      })}
+      {/* Create edges for ALL meshes found in the scene */}
+      {meshes.map((mesh, index) => (
+        <mesh 
+          key={index} 
+          geometry={mesh.geometry}
+          position={mesh.position}
+          rotation={mesh.rotation}
+          scale={mesh.scale}
+        >
+          <meshBasicMaterial visible={false} />
+          <Edges threshold={15} color="black" scale={1.001} />
+        </mesh>
+      ))}
     </>
   );
 }
