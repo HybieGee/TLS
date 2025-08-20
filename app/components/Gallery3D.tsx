@@ -115,12 +115,33 @@ function MovementControls() {
 function BlenderGallery() {
   const { scene } = useGLTF('/models/Gallery.glb');
   
+  // Apply edges effect to all meshes in the scene
+  useEffect(() => {
+    scene.traverse((child) => {
+      if ((child as any).isMesh) {
+        // This ensures proper rendering with edges
+        (child as any).material.polygonOffset = true;
+        (child as any).material.polygonOffsetFactor = 1;
+        (child as any).material.polygonOffsetUnits = 1;
+      }
+    });
+  }, [scene]);
+  
   return (
-    <group dispose={null}>
+    <>
       <primitive object={scene} />
-      {/* Sketchbook outlines: draws black edges around geometry */}
-      <Edges threshold={15} color="black" />
-    </group>
+      {/* Create edges for each mesh in the scene */}
+      {scene.children.map((child, index) => {
+        if ((child as any).isMesh) {
+          return (
+            <mesh key={index} geometry={(child as any).geometry}>
+              <Edges threshold={15} color="black" linewidth={2} />
+            </mesh>
+          );
+        }
+        return null;
+      })}
+    </>
   );
 }
 
