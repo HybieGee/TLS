@@ -1,14 +1,13 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
+import { Text, OrbitControls } from '@react-three/drei';
 import { Suspense, useRef, useEffect } from 'react';
-import * as THREE from 'three';
 
-// WASD Movement Controls
+// Simple WASD Movement Controls
 function MovementControls() {
   const { camera } = useThree();
-  const moveSpeed = 0.1;
+  const moveSpeed = 0.2;
   const keys = useRef({
     w: false, a: false, s: false, d: false
   });
@@ -38,16 +37,23 @@ function MovementControls() {
   }, []);
 
   useFrame(() => {
-    const direction = new THREE.Vector3();
-    const right = new THREE.Vector3();
-    
-    camera.getWorldDirection(direction);
-    right.crossVectors(camera.up, direction);
-
-    if (keys.current.w) camera.position.addScaledVector(direction, -moveSpeed);
-    if (keys.current.s) camera.position.addScaledVector(direction, moveSpeed);
-    if (keys.current.a) camera.position.addScaledVector(right, moveSpeed);
-    if (keys.current.d) camera.position.addScaledVector(right, -moveSpeed);
+    // Simple movement based on camera rotation
+    if (keys.current.w) {
+      camera.position.z -= moveSpeed * Math.cos(camera.rotation.y);
+      camera.position.x -= moveSpeed * Math.sin(camera.rotation.y);
+    }
+    if (keys.current.s) {
+      camera.position.z += moveSpeed * Math.cos(camera.rotation.y);
+      camera.position.x += moveSpeed * Math.sin(camera.rotation.y);
+    }
+    if (keys.current.a) {
+      camera.position.x -= moveSpeed * Math.cos(camera.rotation.y);
+      camera.position.z += moveSpeed * Math.sin(camera.rotation.y);
+    }
+    if (keys.current.d) {
+      camera.position.x += moveSpeed * Math.cos(camera.rotation.y);
+      camera.position.z -= moveSpeed * Math.sin(camera.rotation.y);
+    }
     
     // Keep camera at reasonable height
     camera.position.y = Math.max(0.5, Math.min(4, camera.position.y));
@@ -93,7 +99,6 @@ function PictureFrame({ position, rotation = [0, 0, 0], text }: {
         color="black"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/mono.woff"
       >
         {text}
       </Text>
@@ -177,13 +182,17 @@ export default function Gallery3D() {
     <Canvas
       camera={{ position: [0, 1.6, 12], fov: 75 }}
       style={{ background: '#ffffff' }}
-      onCreated={({ camera }) => {
-        // Set up camera for FPS-style view
-        camera.rotation.order = 'YXZ';
-      }}
     >
       <Suspense fallback={null}>
         <GalleryScene />
+        <OrbitControls 
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          maxPolarAngle={Math.PI / 2}
+          minDistance={3}
+          maxDistance={20}
+        />
       </Suspense>
     </Canvas>
   );
