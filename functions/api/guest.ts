@@ -5,10 +5,9 @@ import { setSecureCookie } from '../../lib/cookies';
 interface RequestHandler {
   request: Request;
   env: Env;
-  ctx: ExecutionContext;
 }
 
-export async function onRequestPost({ request, env, ctx }: RequestHandler): Promise<Response> {
+export async function onRequestPost({ request, env }: RequestHandler): Promise<Response> {
   try {
     // Get IP for session tracking
     const clientIP = request.headers.get('CF-Connecting-IP') || 
