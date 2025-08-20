@@ -21,12 +21,12 @@ function MovementControls() {
 
   // Simple collision check
   const checkCollision = (newPos: THREE.Vector3): boolean => {
-    // Fixed boundaries based on your screenshots
+    // CORRECTED boundaries - I had X and Z mixed up!
     const bounds = {
-      minX: -4.0,  // Left side wall (with small frames) - much tighter to prevent escape
-      maxX: 4.0,   // Right side wall (with small frames) - much tighter to prevent escape
-      minZ: -18,   // Front wall (with large paintings) - further out so you can get close
-      maxZ: 18     // Back wall (with large paintings) - further out so you can get close
+      minX: -18,   // Front/back walls (with large paintings) - further out so you can get close
+      maxX: 18,    // Front/back walls (with large paintings) - further out so you can get close  
+      minZ: -4.0,  // Left/right side walls (with small frames) - tighter to prevent escape
+      maxZ: 4.0    // Left/right side walls (with small frames) - tighter to prevent escape
     };
     
     // Check boundary collisions
