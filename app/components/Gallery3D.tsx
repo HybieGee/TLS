@@ -174,10 +174,11 @@ function BlenderGallery() {
           })
         );
         
-        // Copy transforms - don't scale to keep inside lines visible
+        // Copy transforms and scale slightly inward for better appearance
         line.position.copy(child.position);
         line.rotation.copy(child.rotation);
         line.scale.copy(child.scale);
+        line.scale.multiplyScalar(0.998); // Tiny bit inward to prevent edge bleeding
         line.renderOrder = 1; // Render after meshes
         
         // Add line to parent
@@ -201,10 +202,11 @@ function GalleryScene() {
     <>
       <MovementControls />
       
-      {/* Bright lighting for clean white sketchbook feel */}
-      <ambientLight intensity={1.2} />
-      <directionalLight position={[5, 8, 5]} intensity={1.5} castShadow />
-      <directionalLight position={[-5, 8, -5]} intensity={0.8} />
+      {/* Even brighter lighting for pure white sketchbook feel */}
+      <ambientLight intensity={1.5} />
+      <directionalLight position={[5, 8, 5]} intensity={2.0} castShadow />
+      <directionalLight position={[-5, 8, -5]} intensity={1.2} />
+      <pointLight position={[0, 5, 0]} intensity={0.5} />
       
       {/* Your Blender Gallery Model */}
       <BlenderGallery />
