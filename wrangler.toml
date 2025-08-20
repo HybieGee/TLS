@@ -1,30 +1,18 @@
 name = "living-sketchbook"
 compatibility_date = "2025-08-01"
-
-[pages]
-compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
 
-[[d1_databases]]
+[env.production]
+compatibility_flags = ["nodejs_compat"]
+
+[[env.production.d1_databases]]
 binding = "DB"
 database_name = "sketchbook-db"
 database_id = "551d4368-139d-4a84-bf90-609b7b8fae3e"
 
-[[r2_buckets]]
-binding = "R2"
-bucket_name = "sketchbook-assets"
-
-[[kv_namespaces]]
+[[env.production.kv_namespaces]]
 binding = "KV_SESSIONS"
 id = "9167733127d44c968545b4d173a54ccf"
 
-[[durable_objects.bindings]]
-name = "WorldHub"
-class_name = "WorldHubDO"
-script_name = "living-sketchbook"
-
-[vars]
+[env.production.vars]
 SESSION_COOKIE_NAME = "sb_session"
-
-[triggers]
-crons = ["59 * * * *"]
