@@ -113,7 +113,7 @@ function MovementControls() {
 
 // Blender Gallery Component with Sketchbook Outlines
 function BlenderGallery(props: any) {
-  const { scene } = useGLTF('/models/gallery.glb');
+  const { scene } = useGLTF('/models/Gallery.glb');
   
   return (
     <group {...props} dispose={null}>
@@ -123,6 +123,9 @@ function BlenderGallery(props: any) {
     </group>
   );
 }
+
+// Preload the model
+useGLTF.preload('/models/Gallery.glb');
 
 function GalleryScene() {
   return (
