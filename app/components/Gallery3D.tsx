@@ -42,7 +42,7 @@ function GalleryScene() {
           fontSize={0.2}
           color="black"
           anchorX="center"
-          anchorY="center"
+          anchorY="middle"
         >
           Coming Soon...
         </Text>
@@ -62,7 +62,7 @@ function GalleryScene() {
           fontSize={0.2}
           color="black"
           anchorX="center"
-          anchorY="center"
+          anchorY="middle"
         >
           Your Art Here
         </Text>
@@ -82,7 +82,7 @@ function GalleryScene() {
           fontSize={0.2}
           color="black"
           anchorX="center"
-          anchorY="center"
+          anchorY="middle"
         >
           Gallery
         </Text>
