@@ -228,16 +228,24 @@ function BlenderGallery() {
       comingSoonTexture.needsUpdate = true;
     }
     
-    // Debug: List all mesh names to see what's in your updated gallery model
-    console.log('=== Gallery Model Meshes (Updated) ===');
+    // Debug: List ALL mesh names to identify artwork objects
+    console.log('🔍 === ALL MESHES IN GALLERY MODEL ===');
+    const allMeshes: string[] = [];
     cloned.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        const childNameLower = child.name.toLowerCase();
-        const wouldBeArtwork = (childNameLower.includes('art') || childNameLower.includes('plane') || childNameLower.includes('canvas')) && 
-                              !childNameLower.includes('frame');
-        console.log('🖼️ Mesh:', child.name, '| Is artwork:', wouldBeArtwork, '| Material:', child.material?.type);
+      if (child instanceof THREE.Mesh && child.name) {
+        allMeshes.push(child.name);
+        // Highlight potential artwork meshes
+        const isLikelyArtwork = child.name.toLowerCase().includes('art');
+        if (isLikelyArtwork) {
+          console.log('🎨 ARTWORK MESH FOUND:', child.name);
+        }
       }
     });
+    
+    console.log('📝 ALL MESH NAMES:', allMeshes);
+    console.log('🔍 Looking for these specific names:');
+    console.log('- LeftArtWrok, LeftArtWork.001, LeftArtWork.002');  
+    console.log('- RightArtWork.003, RightArtWork.004, RightArtWork.005');
     
     // Add edges to each mesh and replace artwork textures
     cloned.traverse((child) => {
@@ -245,13 +253,13 @@ function BlenderGallery() {
         // Target only specific artwork objects for Coming Soon texture
         const childNameLower = child.name.toLowerCase();
         
-        // Only apply Coming Soon to these specific artworks (exact names you specified)
-        const isComingSoonArtwork = childNameLower === 'leftartwrok' ||      // Note: "Wrok" as you specified
-                                   childNameLower === 'leftartwork.001' ||
-                                   childNameLower === 'leftartwork.002' ||
-                                   childNameLower === 'rightartwork.003' ||
-                                   childNameLower === 'rightartwork.004' ||
-                                   childNameLower === 'rightartwork.005';
+        // Only apply Coming Soon to these specific artworks (exact names from console)
+        const isComingSoonArtwork = childNameLower === 'leftartwork' ||
+                                   childNameLower === 'leftartwork001' ||
+                                   childNameLower === 'leftartwork002' ||
+                                   childNameLower === 'rightartwork003' ||
+                                   childNameLower === 'rightartwork004' ||
+                                   childNameLower === 'rightartwork005';
         
         if (isComingSoonArtwork && comingSoonTexture) {
           console.log('✅ Applying Coming Soon texture to:', child.name);

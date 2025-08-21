@@ -164,7 +164,8 @@ export function useMultiplayer(config: MultiplayerConfig = {}) {
   }, [sendPlayerUpdate]);
 
   useEffect(() => {
-    connect();
+    // Temporarily disable multiplayer to reduce console spam while debugging
+    // connect();
     
     return () => {
       if (reconnectTimeoutRef.current) {
