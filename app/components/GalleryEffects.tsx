@@ -217,11 +217,21 @@ export function ProximityGlow({ position }: { position: [number, number, number]
 
 // Welcome message overlay
 export function WelcomeOverlay() {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(() => {
+    // Don't show instructions if user has been here before
+    if (typeof window !== 'undefined') {
+      return !localStorage.getItem('gallery_visited');
+    }
+    return true;
+  });
   
   useEffect(() => {
     const handleInteraction = () => {
       setVisible(false);
+      // Mark that user has visited the gallery
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('gallery_visited', 'true');
+      }
     };
 
     // Listen for movement keys only (not mouse movement)

@@ -259,7 +259,8 @@ function BlenderGallery() {
                                    childNameLower === 'leftartwork002' ||
                                    childNameLower === 'rightartwork003' ||
                                    childNameLower === 'rightartwork004' ||
-                                   childNameLower === 'rightartwork005';
+                                   childNameLower === 'rightartwork005' ||
+                                   childNameLower === 'artwork007';
         
         if (isComingSoonArtwork && comingSoonTexture) {
           console.log('✅ Applying Coming Soon texture to:', child.name);
