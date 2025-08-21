@@ -202,15 +202,19 @@ function BlenderGallery() {
         const isArtwork = (artworkNames.some(name => child.name.toLowerCase().includes(name.toLowerCase())) || 
                           child.name.toLowerCase().includes('art') || 
                           child.name.toLowerCase().includes('frame')) &&
-                         // Exclude Frame6 and Artwork6
+                         // Exclude specific frames and artworks
                          !child.name.toLowerCase().includes('frame6') &&
-                         !child.name.toLowerCase().includes('artwork6');
+                         !child.name.toLowerCase().includes('artwork6') &&
+                         !child.name.toLowerCase().includes('frame006') &&
+                         !child.name.toLowerCase().includes('artwork006') &&
+                         !child.name.toLowerCase().includes('frame007') &&
+                         !child.name.toLowerCase().includes('frame7');
         
         if (isArtwork && comingSoonTexture) {
           console.log('Applying texture to:', child.name);
           // Clone texture for rotation
           const rotatedTexture = comingSoonTexture.clone();
-          rotatedTexture.rotation = Math.PI / 2; // 90 degree rotation
+          rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation
           rotatedTexture.center.set(0.5, 0.5);
           rotatedTexture.needsUpdate = true;
           
