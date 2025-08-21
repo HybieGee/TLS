@@ -368,6 +368,8 @@ export function WavingPencil3D() {
       const newTexture = textureRefs.current[currentFrame - 1];
       material.map = newTexture;
       material.opacity = 1.0; // Ensure consistent opacity
+      material.transparent = true; // Keep transparency consistent
+      material.color.set(0xffffff); // Keep color consistent
       material.needsUpdate = true;
     }
   }, [currentFrame]);
