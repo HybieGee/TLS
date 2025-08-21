@@ -74,9 +74,9 @@ interface EnhancedPlayerAvatarProps {
 
 export function EnhancedPlayerAvatar({ 
   position, 
-  color = '#4A90E2', 
+  color = '#333333', 
   name = 'Player', 
-  model = 'capsule',
+  model = 'stick',
   customModelUrl 
 }: EnhancedPlayerAvatarProps) {
   // Always call hooks at the top level
@@ -104,26 +104,7 @@ export function EnhancedPlayerAvatar({
 
   // Render based on model type
   switch (model) {
-    case 'cube':
-      return (
-        <group ref={meshRef} position={position}>
-          <mesh position={[0, 0.5, 0]}>
-            <boxGeometry args={[0.6, 1, 0.6]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 1.1, 0]}>
-            <boxGeometry args={[0.4, 0.4, 0.4]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          {name && (
-            <sprite position={[0, 1.8, 0]}>
-              <spriteMaterial color="white" />
-            </sprite>
-          )}
-        </group>
-      );
-
-    case 'stick':
+    default: // 'stick' - only stick figures now
       return (
         <group ref={meshRef} position={position}>
           <mesh position={[0, 0.8, 0]}>
@@ -145,33 +126,6 @@ export function EnhancedPlayerAvatar({
           <mesh position={[-0.1, 0.3, 0]} rotation={[0, 0, -0.2]}>
             <cylinderGeometry args={[0.03, 0.03, 0.6, 4]} />
             <meshStandardMaterial color={color} />
-          </mesh>
-          {name && (
-            <sprite position={[0, 1.8, 0]}>
-              <spriteMaterial color="white" />
-            </sprite>
-          )}
-        </group>
-      );
-
-    default: // 'capsule'
-      return (
-        <group ref={meshRef} position={position}>
-          <mesh position={[0, 0.5, 0]}>
-            <cylinderGeometry args={[0.3, 0.3, 1, 8]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 1.2, 0]}>
-            <sphereGeometry args={[0.25, 8, 8]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0.1, 1.25, 0.2]}>
-            <sphereGeometry args={[0.05, 4, 4]} />
-            <meshStandardMaterial color="black" />
-          </mesh>
-          <mesh position={[-0.1, 1.25, 0.2]}>
-            <sphereGeometry args={[0.05, 4, 4]} />
-            <meshStandardMaterial color="black" />
           </mesh>
           {name && (
             <sprite position={[0, 1.8, 0]}>

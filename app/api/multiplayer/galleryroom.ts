@@ -127,8 +127,8 @@ export class GalleryRoom extends DurableObject {
       id: playerId,
       position: data.position || [0, 1.6, 0],
       rotation: data.rotation || [0, 0, 0],
-      model: data.model || "capsule",
-      color: data.color || "#4A90E2",
+      model: data.model || "stick",
+      color: data.color || "#333333",
       name: data.name || "Guest",
       lastUpdate: Date.now()
     };

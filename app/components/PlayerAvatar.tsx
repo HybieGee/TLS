@@ -55,63 +55,47 @@ export function PlayerAvatar({ position, color = '#4A90E2', name = 'Player' }: P
   );
 }
 
-// Different preset character models
+// Stick figure character with various colors
+const StickFigure = ({ position, color = '#333333', name }: PlayerAvatarProps) => (
+  <group position={position}>
+    {/* Body */}
+    <mesh position={[0, 0.8, 0]}>
+      <cylinderGeometry args={[0.05, 0.05, 0.8, 4]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+    {/* Head */}
+    <mesh position={[0, 1.4, 0]}>
+      <sphereGeometry args={[0.15, 6, 6]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+    {/* Arms */}
+    <mesh position={[0, 1.1, 0]} rotation={[0, 0, Math.PI / 2]}>
+      <cylinderGeometry args={[0.03, 0.03, 0.6, 4]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+    {/* Legs */}
+    <mesh position={[0.1, 0.3, 0]} rotation={[0, 0, 0.2]}>
+      <cylinderGeometry args={[0.03, 0.03, 0.6, 4]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+    <mesh position={[-0.1, 0.3, 0]} rotation={[0, 0, -0.2]}>
+      <cylinderGeometry args={[0.03, 0.03, 0.6, 4]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+    {/* Name label */}
+    {name && (
+      <sprite position={[0, 1.8, 0]}>
+        <spriteMaterial color="white" />
+      </sprite>
+    )}
+  </group>
+);
+
+// Only stick figures with different colors
 export const characterModels = {
-  capsule: {
-    name: 'Capsule',
-    component: PlayerAvatar,
-    colors: ['#4A90E2', '#E94B3C', '#6BCB77', '#FFD93D', '#6C5CE7', '#A8E6CF']
-  },
-  
-  // Cube character
-  cube: {
-    name: 'Cube Bot',
-    component: ({ position, color = '#FF6B6B' }: PlayerAvatarProps) => (
-      <group position={position}>
-        <mesh position={[0, 0.5, 0]}>
-          <boxGeometry args={[0.6, 1, 0.6]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-        <mesh position={[0, 1.1, 0]}>
-          <boxGeometry args={[0.4, 0.4, 0.4]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-      </group>
-    ),
-    colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7']
-  },
-  
-  // Stick figure
   stick: {
     name: 'Stick Figure',
-    component: ({ position, color = '#333333' }: PlayerAvatarProps) => (
-      <group position={position}>
-        {/* Body */}
-        <mesh position={[0, 0.8, 0]}>
-          <cylinderGeometry args={[0.05, 0.05, 0.8, 4]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-        {/* Head */}
-        <mesh position={[0, 1.4, 0]}>
-          <sphereGeometry args={[0.15, 6, 6]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-        {/* Arms */}
-        <mesh position={[0, 1.1, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.03, 0.03, 0.6, 4]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-        {/* Legs */}
-        <mesh position={[0.1, 0.3, 0]} rotation={[0, 0, 0.2]}>
-          <cylinderGeometry args={[0.03, 0.03, 0.6, 4]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-        <mesh position={[-0.1, 0.3, 0]} rotation={[0, 0, -0.2]}>
-          <cylinderGeometry args={[0.03, 0.03, 0.6, 4]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-      </group>
-    ),
-    colors: ['#333333', '#666666', '#999999', '#2C3E50', '#34495E']
+    component: StickFigure,
+    colors: ['#333333', '#E94B3C', '#4A90E2', '#6BCB77', '#FFD93D', '#6C5CE7', '#A8E6CF', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#666666', '#999999', '#2C3E50', '#34495E']
   }
 };

@@ -31,8 +31,8 @@ export function useMultiplayer(config: MultiplayerConfig = {}) {
   const {
     roomId = 'main',
     playerName = 'Guest',
-    playerModel = 'capsule',
-    playerColor = '#4A90E2'
+    playerModel = 'stick',
+    playerColor = '#333333'
   } = config;
 
   const connect = useCallback(() => {
@@ -53,7 +53,7 @@ export function useMultiplayer(config: MultiplayerConfig = {}) {
           type: 'player_join',
           position: [0, 1.6, 0],
           rotation: [0, 0, 0],
-          model: playerModel,
+          model: 'stick',
           color: playerColor,
           name: playerName
         }));
