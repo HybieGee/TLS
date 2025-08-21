@@ -37,7 +37,30 @@ interface KVNamespace {
 }
 
 export async function POST(request: NextRequest) {
-  const env = process.env as unknown as Env;
+  // For development, return a mock response
+  if (process.env.NODE_ENV === 'development') {
+    const userId = crypto.randomUUID();
+    const sessionId = crypto.randomUUID();
+    
+    const cookieStore = await cookies();
+    cookieStore.set('sb_session', sessionId, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 86400 * 30,
+      path: '/'
+    });
+
+    return NextResponse.json({
+      success: true,
+      userId,
+      sessionId,
+      kind: 'guest'
+    });
+  }
+
+  // For production, access Cloudflare bindings through context
+  const env = (request as any).env as Env;
   
   try {
     const userId = crypto.randomUUID();
