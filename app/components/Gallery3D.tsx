@@ -223,11 +223,21 @@ function BlenderGallery() {
           
           // Apply different rotations based on artwork position/name
           if (child.name.toLowerCase().includes('artwork007')) {
-            // Artwork007 needs different rotation (back wall)
-            rotatedTexture.rotation = Math.PI / 2; // +90 degree rotation
+            // Artwork007 needs no rotation (back wall)
+            rotatedTexture.rotation = 0; // No rotation
           } else {
             // Default rotation for side walls
             rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation
+          }
+          
+          // Fix mirrored text on left side by flipping texture horizontally for certain artworks
+          const childNameLower = child.name.toLowerCase();
+          if (childNameLower.includes('artwork001') || 
+              childNameLower.includes('artwork002') || 
+              childNameLower.includes('artwork003')) {
+            // These might be the left wall - flip horizontally
+            rotatedTexture.repeat.x = -1;
+            rotatedTexture.offset.x = 1;
           }
           
           rotatedTexture.center.set(0.5, 0.5);
