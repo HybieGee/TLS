@@ -62,6 +62,13 @@ export async function POST(request: NextRequest) {
   // For production, access Cloudflare bindings through context
   const env = (request as NextRequest & { env?: Env }).env;
   
+  if (!env?.DB || !env?.KV_SESSIONS) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
+  }
+  
   try {
     const userId = crypto.randomUUID();
     const sessionId = crypto.randomUUID();
