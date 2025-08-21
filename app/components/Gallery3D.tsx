@@ -228,34 +228,35 @@ function BlenderGallery() {
       comingSoonTexture.needsUpdate = true;
     }
     
-    // Debug: List all mesh names
-    console.log('=== Gallery Model Meshes ===');
+    // Debug: List all mesh names to see what's in your updated gallery model
+    console.log('=== Gallery Model Meshes (Updated) ===');
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const childNameLower = child.name.toLowerCase();
         const wouldBeArtwork = (childNameLower.includes('art') || childNameLower.includes('plane') || childNameLower.includes('canvas')) && 
                               !childNameLower.includes('frame');
-        console.log('Mesh:', child.name, '| Would be artwork:', wouldBeArtwork, '| Material:', child.material?.type);
+        console.log('🖼️ Mesh:', child.name, '| Is artwork:', wouldBeArtwork, '| Material:', child.material?.type);
       }
     });
     
     // Add edges to each mesh and replace artwork textures
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // Target only specific artwork objects
+        // Target artwork objects (more comprehensive check)
         const childNameLower = child.name.toLowerCase();
-        // Only apply to specific artworks, excluding Artwork006
-        const isArtwork = childNameLower === 'artwork' ||
-                          childNameLower === 'artwork001' ||
-                          childNameLower === 'artwork002' ||
-                          childNameLower === 'artwork003' ||
-                          childNameLower === 'artwork004' ||
-                          childNameLower === 'artwork005' ||
-                          childNameLower === 'artwork007';
-        // Artwork006 is excluded by not being in the list above
         
-        if (isArtwork && comingSoonTexture) {
-          console.log('Applying texture to:', child.name);
+        // Apply to all artwork meshes EXCEPT artwork006 (if it exists) 
+        const isArtwork = childNameLower.includes('artwork') && 
+                          !childNameLower.includes('frame') &&
+                          childNameLower !== 'artwork006';
+        
+        // Also check for other possible artwork naming patterns
+        const isAlternativeArtwork = childNameLower.includes('art') && 
+                                   !childNameLower.includes('frame') &&
+                                   !childNameLower.includes('wall');
+        
+        if ((isArtwork || isAlternativeArtwork) && comingSoonTexture) {
+          console.log('✅ Applying Coming Soon texture to:', child.name);
           // Clone texture for rotation
           const rotatedTexture = comingSoonTexture.clone();
           
