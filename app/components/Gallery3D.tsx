@@ -282,15 +282,11 @@ function BlenderGallery() {
           rotatedTexture.center.set(0.5, 0.5);
           rotatedTexture.needsUpdate = true;
           
-          const newMaterial = new THREE.MeshStandardMaterial({
+          const newMaterial = new THREE.MeshBasicMaterial({
             map: rotatedTexture,
             transparent: false,
             side: THREE.DoubleSide, // Show on both sides to help with visibility
-            color: 0xffffff,
-            emissive: 0x444444, // Much brighter glow
-            emissiveIntensity: 0.8,
-            roughness: 0.1, // Make it less rough for more brightness
-            metalness: 0.0
+            color: 0xffffff // Full brightness, unaffected by lighting
           });
           child.material = newMaterial;
         }
