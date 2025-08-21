@@ -144,7 +144,7 @@ export function useMultiplayer(config: MultiplayerConfig = {}) {
       console.error('Failed to connect to multiplayer:', error);
       setIsConnected(false);
     }
-  }, [roomId, playerId, playerName, playerModel, playerColor]);
+  }, [roomId, playerId, playerName, playerColor]);
 
   const sendPlayerUpdate = useCallback((update: Partial<PlayerData>) => {
     if (ws.current?.readyState === WebSocket.OPEN) {
