@@ -269,12 +269,10 @@ function BlenderGallery() {
           // Apply rotation
           rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation for ALL
           
-          // Flip horizontally for artworks that appear backwards
-          const childNameLower = child.name.toLowerCase();
-          if (childNameLower === 'artwork003' || 
-              childNameLower === 'artwork004' || 
-              childNameLower === 'artwork005' ||
-              childNameLower === 'artwork007') {
+          // Flip horizontally for right side artworks that appear backwards
+          if (childNameLower === 'rightartwork003' || 
+              childNameLower === 'rightartwork004' || 
+              childNameLower === 'rightartwork005') {
             // Flip texture horizontally to fix backwards text
             rotatedTexture.wrapS = THREE.RepeatWrapping;
             rotatedTexture.repeat.x = -1;
@@ -289,8 +287,10 @@ function BlenderGallery() {
             transparent: false,
             side: THREE.DoubleSide, // Show on both sides to help with visibility
             color: 0xffffff,
-            emissive: 0x222222, // Add slight glow to make it brighter
-            emissiveIntensity: 0.3
+            emissive: 0x444444, // Much brighter glow
+            emissiveIntensity: 0.8,
+            roughness: 0.1, // Make it less rough for more brightness
+            metalness: 0.0
           });
           child.material = newMaterial;
         }

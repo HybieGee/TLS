@@ -116,7 +116,7 @@ export function FloatingParticles() {
     const group = new THREE.Group();
     
     for (let i = 0; i < particleCount; i++) {
-      const geometry = new THREE.BoxGeometry(0.005, 0.005, 0.005);
+      const geometry = new THREE.BoxGeometry(0.01, 0.01, 0.01);
       const material = new THREE.MeshStandardMaterial({
         color: 0x000000,
         emissive: 0x333333,
