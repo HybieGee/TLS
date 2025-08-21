@@ -390,6 +390,7 @@ export function WavingPencil3D() {
         alphaTest={0.1}
         premultipliedAlpha={false}
         depthWrite={true}
+        color={0xffffff} // Full white to prevent dimming
       />
     </mesh>
   );
