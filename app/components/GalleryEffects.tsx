@@ -18,41 +18,12 @@ function useGalleryAudio() {
     // Create audio element for the gallery music
     const music = new Audio('/audio/gallery-music.mp3');
     music.loop = true;
-    music.volume = 0; // Start at 0 for fade in
+    music.volume = 0.3; // Set to 30% volume
     musicRef.current = music;
     
     try {
       await music.play();
-      
-      // Fade in over 3 seconds
-      let fadeVolume = 0;
-      const fadeIn = setInterval(() => {
-        fadeVolume += 0.01;
-        if (fadeVolume >= 0.3) { // Max volume at 0.3 for ambient level
-          music.volume = 0.3;
-          clearInterval(fadeIn);
-        } else {
-          music.volume = fadeVolume;
-        }
-      }, 30); // 3000ms / 100 steps = 30ms per step
-      
-      // Handle loop with fade out/in at the end
-      music.addEventListener('timeupdate', () => {
-        const fadeTime = 3; // 3 seconds fade
-        const remainingTime = music.duration - music.currentTime;
-        
-        // Start fade out when 3 seconds remain
-        if (remainingTime <= fadeTime && remainingTime > 0 && music.volume > 0) {
-          music.volume = Math.max(0, (remainingTime / fadeTime) * 0.3);
-        }
-        
-        // Fade back in at the start of the loop
-        if (music.currentTime <= fadeTime && music.volume < 0.3) {
-          music.volume = Math.min(0.3, (music.currentTime / fadeTime) * 0.3);
-        }
-      });
-      
-      console.log('Gallery music started');
+      console.log('Gallery music started at 30% volume');
     } catch (error) {
       console.log('Could not play music:', error);
     }
