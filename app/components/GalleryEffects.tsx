@@ -297,6 +297,8 @@ export function WavingPencil3D() {
       texture.minFilter = THREE.NearestFilter;
       texture.magFilter = THREE.NearestFilter;
       texture.generateMipmaps = false;
+      texture.premultiplyAlpha = false;
+      texture.flipY = false;
       textures.push(texture);
     }
     
@@ -326,7 +328,9 @@ export function WavingPencil3D() {
   useEffect(() => {
     if (meshRef.current && textureRefs.current[currentFrame - 1]) {
       const material = meshRef.current.material as THREE.MeshBasicMaterial;
-      material.map = textureRefs.current[currentFrame - 1];
+      const newTexture = textureRefs.current[currentFrame - 1];
+      material.map = newTexture;
+      material.opacity = 1.0; // Ensure consistent opacity
       material.needsUpdate = true;
     }
   }, [currentFrame]);
@@ -343,9 +347,12 @@ export function WavingPencil3D() {
       <planeGeometry args={[1, 1]} />
       <meshBasicMaterial 
         map={textureRefs.current[0]} 
-        transparent 
+        transparent={true}
+        opacity={1.0}
         side={THREE.DoubleSide}
         alphaTest={0.1}
+        premultipliedAlpha={false}
+        depthWrite={true}
       />
     </mesh>
   );
