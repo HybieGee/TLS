@@ -1,0 +1,18 @@
+name = "living-sketchbook-worker"
+compatibility_date = "2025-08-01"
+main = "durable-objects.ts"
+
+# Durable Objects
+[[durable_objects.bindings]]
+name = "GALLERY_ROOMS"
+class_name = "GalleryRoom"
+
+# Migrations for Durable Objects
+[[migrations]]
+tag = "v1"
+new_classes = ["GalleryRoom"]
+
+[env.production]
+[[env.production.durable_objects.bindings]]
+name = "GALLERY_ROOMS"
+class_name = "GalleryRoom"

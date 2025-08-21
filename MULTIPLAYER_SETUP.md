@@ -1,40 +1,26 @@
 # Multiplayer Setup Guide
 
 ## 🚨 Current Status
-The multiplayer system has been implemented but requires Durable Objects to be enabled in your Cloudflare dashboard.
+The multiplayer system has been implemented but Cloudflare Pages doesn't directly support Durable Objects. We need to deploy a separate Worker.
 
 ## 📋 Steps to Enable Multiplayer
 
-### Step 1: Enable Durable Objects in Cloudflare Dashboard
-1. Go to your Cloudflare dashboard
-2. Navigate to **Pages** → **living-sketchbook** → **Settings**
-3. Go to **Functions** tab
-4. Find **Durable Objects** section
-5. Click **Add binding**
-6. Set:
-   - **Variable name**: `GALLERY_ROOMS`
-   - **Durable Object class**: `GalleryRoom` 
-   - **Script name**: `living-sketchbook`
-
-### Step 2: Update wrangler.toml (After Step 1)
-Add this back to your `wrangler.toml`:
-
-```toml
-# Durable Objects for multiplayer
-[[durable_objects.bindings]]
-name = "GALLERY_ROOMS"
-class_name = "GalleryRoom"
-
-[[env.production.durable_objects.bindings]]
-name = "GALLERY_ROOMS"
-class_name = "GalleryRoom"
-```
-
-### Step 3: Deploy Durable Object Class
-Run this command to deploy the Durable Object:
+### Step 1: Deploy the Durable Objects Worker
+Run this command to deploy the multiplayer Worker:
 ```bash
-wrangler deploy app/api/multiplayer/galleryroom.ts
+wrangler deploy --config wrangler-worker.toml
 ```
+
+### Step 2: Update Pages Bindings
+1. Go to your Cloudflare dashboard
+2. Navigate to **Pages** → **living-sketchbook** → **Settings** → **Functions**
+3. Add **Service Binding**:
+   - **Variable name**: `GALLERY_ROOMS` 
+   - **Service**: `living-sketchbook-worker`
+   - **Environment**: `production`
+
+### Step 3: Update Frontend WebSocket URL
+The frontend will need to connect to the Worker URL instead of the Pages URL for multiplayer.
 
 ## 🎮 What Works Right Now (Without Multiplayer)
 Even without the multiplayer backend, you can test:

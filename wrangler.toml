@@ -1,7 +1,6 @@
 name = "living-sketchbook"
 compatibility_date = "2025-08-01"
 pages_build_output_dir = ".vercel/output/static"
-main = "durable-objects.ts"
 
 [[d1_databases]]
 binding = "DB"
@@ -31,11 +30,5 @@ id = "9167733127d44c968545b4d173a54ccf"
 [env.production.vars]
 SESSION_COOKIE_NAME = "sb_session"
 
-# Durable Objects for multiplayer
-[[durable_objects.bindings]]
-name = "GALLERY_ROOMS"
-class_name = "GalleryRoom"
-
-[[env.production.durable_objects.bindings]]
-name = "GALLERY_ROOMS"
-class_name = "GalleryRoom"
+# Durable Objects for multiplayer - requires separate Worker deployment
+# See MULTIPLAYER_SETUP.md for configuration instructions
