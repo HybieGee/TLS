@@ -273,7 +273,8 @@ function BlenderGallery() {
           // Flip horizontally for right side artworks that appear backwards
           if (childNameLower === 'rightartwork003' || 
               childNameLower === 'rightartwork004' || 
-              childNameLower === 'rightartwork005') {
+              childNameLower === 'rightartwork005' ||
+              childNameLower === 'artwork007') {
             // Flip texture horizontally to fix backwards text
             rotatedTexture.wrapS = THREE.RepeatWrapping;
             rotatedTexture.repeat.x = -1;

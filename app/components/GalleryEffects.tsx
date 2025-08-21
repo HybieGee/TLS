@@ -18,7 +18,7 @@ function useGalleryAudio() {
     // Create audio element for the gallery music
     const music = new Audio('/audio/gallery-music.mp3');
     music.loop = true;
-    music.volume = 0.2; // Set to 20% volume
+    music.volume = 0.05; // Set to 5% volume
     musicRef.current = music;
     
     try {
