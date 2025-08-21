@@ -217,20 +217,8 @@ function BlenderGallery() {
           // Clone texture for rotation
           const rotatedTexture = comingSoonTexture.clone();
           
-          // Apply different rotations to fix mirroring
-          const childNameLower = child.name.toLowerCase();
-          if (childNameLower === 'artwork003' || 
-              childNameLower === 'artwork004' || 
-              childNameLower === 'artwork005') {
-            // These need no rotation
-            rotatedTexture.rotation = 0; // No rotation
-          } else if (childNameLower === 'artwork007') {
-            // Artwork007 needs 180 degree rotation
-            rotatedTexture.rotation = Math.PI; // 180 degree rotation
-          } else {
-            // artwork, artwork001, artwork002 use -90 degrees
-            rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation
-          }
+          // Apply ALL the same rotation since they're all sideways
+          rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation for ALL
           
           rotatedTexture.center.set(0.5, 0.5);
           rotatedTexture.needsUpdate = true;
