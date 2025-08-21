@@ -336,7 +336,7 @@ export function WavingPencil3D() {
   return (
     <mesh 
       ref={meshRef} 
-      position={[-10, 0.2, -7]} // Back left corner, lowered to ground level
+      position={[-10, 1.0, -7]} // Back left corner, standing on ground
       rotation={[0, Math.PI / 4, 0]} // 45 degree rotation to face inward
       scale={[2, 2, 1]} // Make it bigger
     >
