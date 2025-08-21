@@ -371,7 +371,8 @@ export function WavingPencil3D() {
     
     const interval = setInterval(() => {
       setCurrentFrame((prev) => {
-        const nextFrame = prev >= 16 ? 1 : prev + 1;
+        // Skip problematic frames - avoid frame 1 after 16
+        const nextFrame = prev >= 16 ? 2 : prev + 1;
         console.log('Frame:', nextFrame); // Debug log
         return nextFrame;
       });
