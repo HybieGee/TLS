@@ -9,7 +9,7 @@ import { FloatingParticles, AnimatedSpotlight, WelcomeOverlay, AudioTrigger, Wav
 // FPS Movement Controls with Collision Detection
 function MovementControls() {
   const { camera, gl } = useThree();
-  const moveSpeed = 0.1;
+  const moveSpeed = 5; // Units per second (not per frame)
   const lookSpeed = 0.002;
   const playerRadius = 0.5; // Collision radius
   
@@ -104,7 +104,7 @@ function MovementControls() {
     };
   }, [gl, lookSpeed]);
 
-  useFrame(() => {
+  useFrame((state, delta) => {
     // Apply mouse look
     camera.rotation.y = -mouse.current.x;
     camera.rotation.x = -mouse.current.y;
@@ -121,25 +121,26 @@ function MovementControls() {
       z: -Math.sin(camera.rotation.y)
     };
 
-    // Calculate movement directions
+    // Calculate movement directions (frame-rate independent)
+    const frameMoveSpeed = moveSpeed * delta; // Scale by delta time
     let deltaX = 0;
     let deltaZ = 0;
 
     if (keys.current.w) {
-      deltaX += forward.x * moveSpeed;
-      deltaZ += forward.z * moveSpeed;
+      deltaX += forward.x * frameMoveSpeed;
+      deltaZ += forward.z * frameMoveSpeed;
     }
     if (keys.current.s) {
-      deltaX -= forward.x * moveSpeed;
-      deltaZ -= forward.z * moveSpeed;
+      deltaX -= forward.x * frameMoveSpeed;
+      deltaZ -= forward.z * frameMoveSpeed;
     }
     if (keys.current.a) {
-      deltaX -= right.x * moveSpeed;
-      deltaZ -= right.z * moveSpeed;
+      deltaX -= right.x * frameMoveSpeed;
+      deltaZ -= right.z * frameMoveSpeed;
     }
     if (keys.current.d) {
-      deltaX += right.x * moveSpeed;
-      deltaZ += right.z * moveSpeed;
+      deltaX += right.x * frameMoveSpeed;
+      deltaZ += right.z * frameMoveSpeed;
     }
 
     // Try movement with wall sliding
@@ -172,15 +173,15 @@ function MovementControls() {
       }
     }
     
-    // Jump physics
+    // Jump physics (frame-rate independent)
     if (keys.current.space && !jumpState.current.isJumping) {
       jumpState.current.isJumping = true;
-      jumpState.current.jumpVelocity = 0.3; // Initial jump velocity
+      jumpState.current.jumpVelocity = 8; // Initial jump velocity (units per second)
     }
     
     if (jumpState.current.isJumping) {
-      jumpState.current.jumpVelocity -= 0.015; // Gravity
-      camera.position.y += jumpState.current.jumpVelocity;
+      jumpState.current.jumpVelocity -= 25 * delta; // Gravity (units per second²)
+      camera.position.y += jumpState.current.jumpVelocity * delta;
       
       // Check if landed
       if (camera.position.y <= jumpState.current.groundLevel) {
