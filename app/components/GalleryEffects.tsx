@@ -298,7 +298,6 @@ export function WavingPencil3D() {
       texture.magFilter = THREE.NearestFilter;
       texture.generateMipmaps = false;
       texture.premultiplyAlpha = false;
-      texture.flipY = false;
       textures.push(texture);
     }
     
