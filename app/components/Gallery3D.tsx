@@ -245,8 +245,8 @@ function BlenderGallery() {
         // Target only specific artwork objects for Coming Soon texture
         const childNameLower = child.name.toLowerCase();
         
-        // Only apply Coming Soon to these specific artworks
-        const isComingSoonArtwork = childNameLower === 'leftartwork' ||
+        // Only apply Coming Soon to these specific artworks (exact names you specified)
+        const isComingSoonArtwork = childNameLower === 'leftartwrok' ||      // Note: "Wrok" as you specified
                                    childNameLower === 'leftartwork.001' ||
                                    childNameLower === 'leftartwork.002' ||
                                    childNameLower === 'rightartwork.003' ||
