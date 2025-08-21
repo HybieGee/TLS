@@ -5,47 +5,45 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Text, Float } from '@react-three/drei';
 import * as THREE from 'three';
 
-// Audio management hook
+// Simplified audio system using Web Audio API
 function useGalleryAudio() {
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
-  const ambientRef = useRef<HTMLAudioElement | null>(null);
-  const footstepRef = useRef<HTMLAudioElement | null>(null);
   const lastFootstepTime = useRef(0);
 
-  useEffect(() => {
-    // Create ambient audio
-    const ambient = new Audio('/audio/ambient-gallery.mp3');
-    ambient.loop = true;
-    ambient.volume = 0.3;
-    ambientRef.current = ambient;
-
-    // Create footstep audio
-    const footstep = new Audio('/audio/footstep.mp3');
-    footstep.volume = 0.5;
-    footstepRef.current = footstep;
-
-    return () => {
-      ambient.pause();
-      footstep.pause();
-    };
-  }, []);
-
   const enableAudio = async () => {
-    if (!isAudioEnabled && ambientRef.current) {
+    if (!isAudioEnabled) {
       try {
-        await ambientRef.current.play();
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        setAudioContext(context);
         setIsAudioEnabled(true);
+        console.log('Audio enabled');
       } catch (error) {
-        console.log('Audio autoplay blocked, waiting for user interaction');
+        console.log('Audio not supported');
       }
     }
   };
 
   const playFootstep = () => {
     const now = Date.now();
-    if (footstepRef.current && now - lastFootstepTime.current > 400) {
-      footstepRef.current.currentTime = 0;
-      footstepRef.current.play().catch(() => {});
+    if (audioContext && now - lastFootstepTime.current > 400) {
+      // Create a simple footstep sound using Web Audio API
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Short low-frequency sound for footstep
+      oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.1);
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+      
       lastFootstepTime.current = now;
     }
   };
@@ -81,7 +79,7 @@ export function AudioTrigger() {
     const currentPosition = camera.position;
     const distance = currentPosition.distanceTo(lastPosition.current);
     
-    if (distance > 0.2 && hasInteracted) {
+    if (distance > 0.15 && hasInteracted) {
       playFootstep();
       lastPosition.current.copy(currentPosition);
     }
@@ -155,36 +153,16 @@ export function AnimatedFrames({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Proximity detector for artworks with interactive info panels
+// Simple proximity glow for artworks
 export function ProximityGlow({ position, name }: { position: [number, number, number], name: string }) {
   const { camera } = useThree();
-  const [isNear, setIsNear] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
   const [opacity, setOpacity] = useState(0);
   const meshRef = useRef<THREE.Mesh>(null);
-  
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === 'e' && isNear) {
-        setShowInfo(!showInfo);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyPress);
-    return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [isNear, showInfo]);
   
   useFrame(() => {
     const distance = camera.position.distanceTo(new THREE.Vector3(...position));
     const nearThreshold = 4;
-    const newIsNear = distance < nearThreshold;
-    
-    if (newIsNear !== isNear) {
-      setIsNear(newIsNear);
-      if (!newIsNear) {
-        setShowInfo(false);
-      }
-    }
+    const isNear = distance < nearThreshold;
     
     // Smooth glow transition
     const targetOpacity = isNear ? 0.2 : 0;
@@ -194,116 +172,18 @@ export function ProximityGlow({ position, name }: { position: [number, number, n
       (meshRef.current.material as THREE.MeshBasicMaterial).opacity = opacity;
     }
   });
-
-  const artworkInfo = {
-    'Artwork001': { title: 'Submission #001', description: 'First artwork in the gallery', votes: '12 votes' },
-    'Artwork002': { title: 'Submission #002', description: 'Creative character design', votes: '8 votes' },
-    'Artwork003': { title: 'Submission #003', description: 'Artistic interpretation', votes: '15 votes' },
-    'Artwork004': { title: 'Submission #004', description: 'Unique sketch style', votes: '6 votes' },
-    'Artwork005': { title: 'Submission #005', description: 'Bold design choice', votes: '20 votes' },
-    'Artwork007': { title: 'Submission #007', description: 'Detailed artwork', votes: '9 votes' },
-    'Large Artwork': { title: 'Featured Piece', description: 'Current hourly winner', votes: '45 votes' }
-  };
-
-  const info = artworkInfo[name as keyof typeof artworkInfo] || { title: name, description: 'Coming soon...', votes: '0 votes' };
   
   return (
-    <>
-      {/* Subtle glow effect */}
-      <mesh ref={meshRef} position={position}>
-        <planeGeometry args={[3, 2]} />
-        <meshBasicMaterial 
-          color="#ffff99" 
-          transparent 
-          opacity={opacity}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-      
-      {/* Interaction prompt */}
-      {isNear && !showInfo && (
-        <Text
-          position={[position[0], position[1] - 1.5, position[2] + 0.1]}
-          fontSize={0.12}
-          color="black"
-          anchorX="center"
-          anchorY="middle"
-          outlineWidth={0.01}
-          outlineColor="white"
-        >
-          Press E to view details
-        </Text>
-      )}
-      
-      {/* Info panel */}
-      {showInfo && (
-        <group position={[position[0] + 2, position[1], position[2] + 0.5]}>
-          {/* Background panel */}
-          <mesh>
-            <planeGeometry args={[2.5, 1.5]} />
-            <meshBasicMaterial color="white" transparent opacity={0.9} />
-          </mesh>
-          
-          {/* Border */}
-          <mesh position={[0, 0, 0.001]}>
-            <planeGeometry args={[2.5, 1.5]} />
-            <meshBasicMaterial color="black" transparent opacity={0.8} />
-          </mesh>
-          
-          <mesh position={[0, 0, 0.002]}>
-            <planeGeometry args={[2.3, 1.3]} />
-            <meshBasicMaterial color="white" />
-          </mesh>
-          
-          {/* Info text */}
-          <Text
-            position={[0, 0.4, 0.003]}
-            fontSize={0.08}
-            color="black"
-            anchorX="center"
-            anchorY="middle"
-            font="/fonts/mono.woff"
-          >
-            {info.title}
-          </Text>
-          
-          <Text
-            position={[0, 0.1, 0.003]}
-            fontSize={0.06}
-            color="#666666"
-            anchorX="center"
-            anchorY="middle"
-            font="/fonts/mono.woff"
-            maxWidth={2}
-          >
-            {info.description}
-          </Text>
-          
-          <Text
-            position={[0, -0.2, 0.003]}
-            fontSize={0.05}
-            color="black"
-            anchorX="center"
-            anchorY="middle"
-            font="/fonts/mono.woff"
-          >
-            {info.votes}
-          </Text>
-          
-          <Text
-            position={[0, -0.4, 0.003]}
-            fontSize={0.04}
-            color="#999999"
-            anchorX="center"
-            anchorY="middle"
-            font="/fonts/mono.woff"
-          >
-            Press E to close
-          </Text>
-        </group>
-      )}
-    </>
+    <mesh ref={meshRef} position={position}>
+      <planeGeometry args={[3, 2]} />
+      <meshBasicMaterial 
+        color="#ffff99" 
+        transparent 
+        opacity={opacity}
+        side={THREE.DoubleSide}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
   );
 }
 
@@ -327,22 +207,23 @@ export function WelcomeOverlay() {
             <h3 className="font-bold mb-2">Movement:</h3>
             <ul className="space-y-1">
               <li>→ WASD to move</li>
+              <li>→ SPACE to jump</li>
               <li>→ Mouse to look around</li>
               <li>→ Click to lock cursor</li>
               <li>→ ESC to unlock</li>
             </ul>
           </div>
           <div>
-            <h3 className="font-bold mb-2">Interactions:</h3>
+            <h3 className="font-bold mb-2">Experience:</h3>
             <ul className="space-y-1">
-              <li>→ Approach artworks</li>
-              <li>→ Press E for details</li>
+              <li>→ Approach artworks for glow</li>
               <li>→ Listen for footsteps</li>
+              <li>→ Enjoy floating particles</li>
               <li>→ Vote every hour!</li>
             </ul>
           </div>
         </div>
-        <p className="font-mono text-xs mt-4 text-gray-600">Audio will start after your first interaction...</p>
+        <p className="font-mono text-xs mt-4 text-gray-600">Audio starts after your first click or keypress...</p>
       </div>
     </div>
   );

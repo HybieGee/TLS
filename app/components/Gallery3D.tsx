@@ -14,11 +14,18 @@ function MovementControls() {
   const playerRadius = 0.5; // Collision radius
   
   const keys = useRef({
-    w: false, a: false, s: false, d: false
+    w: false, a: false, s: false, d: false, space: false
   });
   
   const mouse = useRef({ x: 0, y: 0 });
   const isPointerLocked = useRef(false);
+  
+  // Jump physics
+  const jumpState = useRef({
+    isJumping: false,
+    jumpVelocity: 0,
+    groundLevel: 1.6
+  });
 
   // Simple collision check
   const checkCollision = (newPos: THREE.Vector3): boolean => {
@@ -47,14 +54,18 @@ function MovementControls() {
     // Keyboard controls
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-      if (key in keys.current) {
+      if (key === ' ') {
+        keys.current.space = true;
+      } else if (key in keys.current) {
         keys.current[key as keyof typeof keys.current] = true;
       }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-      if (key in keys.current) {
+      if (key === ' ') {
+        keys.current.space = false;
+      } else if (key in keys.current) {
         keys.current[key as keyof typeof keys.current] = false;
       }
     };
@@ -161,8 +172,26 @@ function MovementControls() {
       }
     }
     
-    // Keep camera at eye level
-    camera.position.y = 1.6;
+    // Jump physics
+    if (keys.current.space && !jumpState.current.isJumping) {
+      jumpState.current.isJumping = true;
+      jumpState.current.jumpVelocity = 0.3; // Initial jump velocity
+    }
+    
+    if (jumpState.current.isJumping) {
+      jumpState.current.jumpVelocity -= 0.015; // Gravity
+      camera.position.y += jumpState.current.jumpVelocity;
+      
+      // Check if landed
+      if (camera.position.y <= jumpState.current.groundLevel) {
+        camera.position.y = jumpState.current.groundLevel;
+        jumpState.current.isJumping = false;
+        jumpState.current.jumpVelocity = 0;
+      }
+    } else {
+      // Keep camera at eye level when not jumping
+      camera.position.y = jumpState.current.groundLevel;
+    }
   });
 
   return null;
