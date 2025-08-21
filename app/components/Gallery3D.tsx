@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
 import { useGLTF, Float } from '@react-three/drei';
 import React, { Suspense, useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import { FloatingParticles, AnimatedSpotlight, WelcomeOverlay, ProximityGlow, AudioTrigger, WavingPencil3D } from './GalleryEffects';
+import { FloatingParticles, AnimatedSpotlight, WelcomeOverlay, AudioTrigger, WavingPencil3D } from './GalleryEffects';
 
 // FPS Movement Controls with Collision Detection
 function MovementControls() {
@@ -345,14 +345,6 @@ function GalleryScene() {
       </Float>
       
       
-      {/* Proximity glow effects for artworks */}
-      <ProximityGlow position={[-8, 1.5, -3]} name="Artwork001" />
-      <ProximityGlow position={[-8, 1.5, 0]} name="Artwork002" />
-      <ProximityGlow position={[-8, 1.5, 3]} name="Artwork003" />
-      <ProximityGlow position={[8, 1.5, -3]} name="Artwork004" />
-      <ProximityGlow position={[8, 1.5, 0]} name="Artwork005" />
-      <ProximityGlow position={[8, 1.5, 3]} name="Artwork007" />
-      <ProximityGlow position={[0, 2, -8]} name="Large Artwork" />
       
       {/* Animated 3D pencil character */}
       <WavingPencil3D />
