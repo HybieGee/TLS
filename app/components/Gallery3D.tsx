@@ -1,9 +1,10 @@
 'use client';
 
 import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
-import React, { Suspense, useRef, useEffect } from 'react';
+import { useGLTF, Text, Float } from '@react-three/drei';
+import React, { Suspense, useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
+import { FloatingParticles, AnimatedSpotlight, WelcomeOverlay, ProximityGlow, AudioTrigger } from './GalleryEffects';
 
 // FPS Movement Controls with Collision Detection
 function MovementControls() {
@@ -282,9 +283,12 @@ function BlenderGallery() {
 useGLTF.preload('/models/Gallery.glb');
 
 function GalleryScene() {
+  const [showInfo, setShowInfo] = useState(false);
+  
   return (
     <>
       <MovementControls />
+      <AudioTrigger />
       
       {/* Ultra bright lighting to match Blender render */}
       <ambientLight intensity={4.0} />
@@ -297,28 +301,76 @@ function GalleryScene() {
       <pointLight position={[0, 8, 5]} intensity={1.5} />
       <pointLight position={[0, 8, -5]} intensity={1.5} />
       
-      {/* Your Blender Gallery Model (with built-in Coming Soon placeholders) */}
-      <BlenderGallery />
+      {/* Animated spotlight for dynamic lighting */}
+      <AnimatedSpotlight />
+      
+      {/* Floating particles for atmosphere */}
+      <FloatingParticles />
+      
+      {/* Your Blender Gallery Model */}
+      <Float 
+        speed={0.5}
+        rotationIntensity={0.005}
+        floatIntensity={0.02}
+        floatingRange={[-0.01, 0.01]}
+      >
+        <BlenderGallery />
+      </Float>
+      
+      {/* Interactive text hints */}
+      <Text
+        position={[0, 4, 0]}
+        fontSize={0.3}
+        color="black"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.02}
+        outlineColor="white"
+      >
+        THE LIVING SKETCHBOOK
+      </Text>
+      
+      <Text
+        position={[0, 3.5, 0]}
+        fontSize={0.15}
+        color="#666666"
+        anchorX="center"
+        anchorY="middle"
+      >
+        Explore • Vote • Create
+      </Text>
+      
+      {/* Proximity glow effects for artworks */}
+      <ProximityGlow position={[-8, 1.5, -3]} name="Artwork001" />
+      <ProximityGlow position={[-8, 1.5, 0]} name="Artwork002" />
+      <ProximityGlow position={[-8, 1.5, 3]} name="Artwork003" />
+      <ProximityGlow position={[8, 1.5, -3]} name="Artwork004" />
+      <ProximityGlow position={[8, 1.5, 0]} name="Artwork005" />
+      <ProximityGlow position={[8, 1.5, 3]} name="Artwork007" />
+      <ProximityGlow position={[0, 2, -8]} name="Large Artwork" />
     </>
   );
 }
 
 export default function Gallery3D() {
   return (
-    <Canvas
-      camera={{ position: [0, 1.6, 6], fov: 60 }}
-      style={{ background: '#ffffff' }}
-      shadows
-      gl={{ 
-        antialias: true, 
-        toneMapping: THREE.NoToneMapping,
-        outputColorSpace: THREE.SRGBColorSpace,
-        toneMappingExposure: 1.5
-      }}
-    >
-      <Suspense fallback={null}>
-        <GalleryScene />
-      </Suspense>
-    </Canvas>
+    <>
+      <WelcomeOverlay />
+      <Canvas
+        camera={{ position: [0, 1.6, 6], fov: 60 }}
+        style={{ background: '#ffffff' }}
+        shadows
+        gl={{ 
+          antialias: true, 
+          toneMapping: THREE.NoToneMapping,
+          outputColorSpace: THREE.SRGBColorSpace,
+          toneMappingExposure: 1.5
+        }}
+      >
+        <Suspense fallback={null}>
+          <GalleryScene />
+        </Suspense>
+      </Canvas>
+    </>
   );
 }
