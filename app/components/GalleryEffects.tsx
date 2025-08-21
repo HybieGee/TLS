@@ -148,11 +148,10 @@ export function FloatingParticles() {
     <points ref={particlesRef} geometry={particles}>
       <pointsMaterial
         color="#000000"
-        size={0.05}
+        size={0.8}
         transparent
-        opacity={0.6}
+        opacity={0.8}
         sizeAttenuation
-        blending={THREE.AdditiveBlending}
       />
     </points>
   );
@@ -215,8 +214,8 @@ export function WelcomeOverlay() {
       setVisible(false);
     };
 
-    // Listen for any user interaction
-    const events = ['keydown', 'click', 'mousemove', 'wheel'];
+    // Listen for movement keys only (not mouse movement)
+    const events = ['keydown'];
     
     events.forEach(event => {
       document.addEventListener(event, handleInteraction);

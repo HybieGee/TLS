@@ -288,7 +288,9 @@ function BlenderGallery() {
             map: rotatedTexture,
             transparent: false,
             side: THREE.DoubleSide, // Show on both sides to help with visibility
-            color: 0xffffff
+            color: 0xffffff,
+            emissive: 0x222222, // Add slight glow to make it brighter
+            emissiveIntensity: 0.3
           });
           child.material = newMaterial;
         }
