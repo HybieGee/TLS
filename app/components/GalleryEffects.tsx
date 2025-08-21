@@ -2,7 +2,7 @@
 
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Text, Float } from '@react-three/drei';
+import { Float } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Simplified audio system using Web Audio API
@@ -14,11 +14,11 @@ function useGalleryAudio() {
   const enableAudio = async () => {
     if (!isAudioEnabled) {
       try {
-        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const context = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
         setAudioContext(context);
         setIsAudioEnabled(true);
         console.log('Audio enabled');
-      } catch (error) {
+      } catch {
         console.log('Audio not supported');
       }
     }
@@ -154,7 +154,7 @@ export function AnimatedFrames({ children }: { children: React.ReactNode }) {
 }
 
 // Simple proximity glow for artworks
-export function ProximityGlow({ position, name }: { position: [number, number, number], name: string }) {
+export function ProximityGlow({ position }: { position: [number, number, number], name: string }) {
   const { camera } = useThree();
   const [opacity, setOpacity] = useState(0);
   const meshRef = useRef<THREE.Mesh>(null);

@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
 import { useGLTF, Text, Float } from '@react-three/drei';
-import React, { Suspense, useRef, useEffect, useState } from 'react';
+import React, { Suspense, useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { FloatingParticles, AnimatedSpotlight, WelcomeOverlay, ProximityGlow, AudioTrigger } from './GalleryEffects';
 
@@ -312,8 +312,6 @@ function BlenderGallery() {
 useGLTF.preload('/models/Gallery.glb');
 
 function GalleryScene() {
-  const [showInfo, setShowInfo] = useState(false);
-  
   return (
     <>
       <MovementControls />
