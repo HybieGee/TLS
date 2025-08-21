@@ -107,54 +107,64 @@ export function AudioTrigger() {
   return null;
 }
 
-// Floating dust particles for atmosphere
+// Floating glowing cube particles for atmosphere
 export function FloatingParticles() {
-  const particlesRef = useRef<THREE.Points>(null);
-  const particleCount = 100;
+  const meshRef = useRef<THREE.Group>(null);
+  const particleCount = 50;
   
   const particles = useMemo(() => {
-    const positions = new Float32Array(particleCount * 3);
-    const sizes = new Float32Array(particleCount);
+    const group = new THREE.Group();
     
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 30;
-      positions[i * 3 + 1] = Math.random() * 6;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
-      sizes[i] = Math.random() * 0.05 + 0.02;
+      const geometry = new THREE.BoxGeometry(0.02, 0.02, 0.02);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x000000,
+        emissive: 0x333333,
+        emissiveIntensity: 0.5,
+        transparent: true,
+        opacity: 0.7
+      });
+      
+      const cube = new THREE.Mesh(geometry, material);
+      cube.position.set(
+        (Math.random() - 0.5) * 30,
+        Math.random() * 6,
+        (Math.random() - 0.5) * 20
+      );
+      
+      // Store initial position for floating animation
+      cube.userData = {
+        initialY: cube.position.y,
+        floatOffset: Math.random() * Math.PI * 2,
+        floatSpeed: 0.5 + Math.random() * 0.5
+      };
+      
+      group.add(cube);
     }
     
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    
-    return geometry;
+    return group;
   }, []);
   
   useFrame((state) => {
-    if (particlesRef.current) {
-      particlesRef.current.rotation.y += 0.0001;
-      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+    if (meshRef.current) {
+      meshRef.current.rotation.y += 0.0001;
       
-      for (let i = 0; i < particleCount; i++) {
-        const y = positions[i * 3 + 1];
-        positions[i * 3 + 1] = y + Math.sin(state.clock.elapsedTime + i) * 0.001;
-      }
-      
-      particlesRef.current.geometry.attributes.position.needsUpdate = true;
+      meshRef.current.children.forEach((child, i) => {
+        const mesh = child as THREE.Mesh;
+        const userData = mesh.userData;
+        
+        // Gentle floating animation
+        mesh.position.y = userData.initialY + 
+          Math.sin(state.clock.elapsedTime * userData.floatSpeed + userData.floatOffset) * 0.1;
+        
+        // Gentle rotation
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.005;
+      });
     }
   });
   
-  return (
-    <points ref={particlesRef} geometry={particles}>
-      <pointsMaterial
-        color="#000000"
-        size={0.8}
-        transparent
-        opacity={0.8}
-        sizeAttenuation
-      />
-    </points>
-  );
+  return <primitive ref={meshRef} object={particles} />;
 }
 
 // Animated frames that gently float
