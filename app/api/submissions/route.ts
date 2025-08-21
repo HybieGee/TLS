@@ -75,7 +75,24 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const env = process.env as unknown as Env;
+  // For development, return success without database interaction
+  if (process.env.NODE_ENV === 'development') {
+    return NextResponse.json({
+      success: true,
+      submissionId: crypto.randomUUID(),
+      status: 'approved',
+      message: 'Character submitted successfully!'
+    });
+  }
+
+  const env = (request as NextRequest & { env?: Env }).env;
+  
+  if (!env?.DB || !env?.KV_SESSIONS) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
+  }
   
   try {
     const cookieStore = await cookies();
@@ -109,6 +126,22 @@ export async function POST(request: NextRequest) {
     if (name.length > 100 || description.length > 500) {
       return NextResponse.json(
         { error: 'Name must be under 100 chars, description under 500' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user has already made 3 submissions this hour
+    const hourStart = new Date();
+    hourStart.setMinutes(0, 0, 0);
+    const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
+    
+    const existingSubmissions = await env.DB.prepare(
+      'SELECT COUNT(*) as count FROM Submission WHERE userId = ? AND createdAt >= ? AND createdAt < ?'
+    ).bind(session.userId, hourStart.toISOString(), hourEnd.toISOString()).first();
+
+    if (existingSubmissions && existingSubmissions.count >= 3) {
+      return NextResponse.json(
+        { error: 'You have reached the maximum of 3 submissions per hour' },
         { status: 400 }
       );
     }

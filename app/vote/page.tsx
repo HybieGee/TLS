@@ -25,7 +25,8 @@ interface Period {
 export default function VotePage() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [period, setPeriod] = useState<Period | null>(null);
-  const [votedSubmissionId, setVotedSubmissionId] = useState<string | null>(null);
+  const [votedSubmissionIds, setVotedSubmissionIds] = useState<string[]>([]);
+  const [votesRemaining, setVotesRemaining] = useState(3);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState('--:--');
 
@@ -78,7 +79,8 @@ export default function VotePage() {
       if (remaining === 0) {
         setTimeout(() => {
           fetchCurrentPeriod();
-          setVotedSubmissionId(null);
+          setVotedSubmissionIds([]);
+          setVotesRemaining(3);
         }, 2000);
       }
     }, 1000);
@@ -88,7 +90,7 @@ export default function VotePage() {
 
 
   const handleVote = async (submissionId: string) => {
-    if (!period || votedSubmissionId) return;
+    if (!period || votesRemaining <= 0 || votedSubmissionIds.includes(submissionId)) return;
     
     try {
       const response = await fetch('/api/votes', {
@@ -103,7 +105,8 @@ export default function VotePage() {
       const data = await response.json();
       
       if (response.ok) {
-        setVotedSubmissionId(submissionId);
+        setVotedSubmissionIds(prev => [...prev, submissionId]);
+        setVotesRemaining(prev => prev - 1);
         setSubmissions(prev => prev.map(sub => 
           sub.id === submissionId 
             ? { ...sub, voteCount: sub.voteCount + 1 }
@@ -125,9 +128,15 @@ export default function VotePage() {
           <h1 className="text-3xl font-bold font-mono text-black">
             Vote for Characters
           </h1>
-          <div className="border-2 border-black px-4 py-2 bg-white">
-            <span className="font-mono font-bold">Time left: </span>
-            <span className="font-mono text-xl">{timeLeft}</span>
+          <div className="flex gap-4">
+            <div className="border-2 border-black px-4 py-2 bg-white">
+              <span className="font-mono font-bold">Votes left: </span>
+              <span className="font-mono text-xl">{votesRemaining}/3</span>
+            </div>
+            <div className="border-2 border-black px-4 py-2 bg-white">
+              <span className="font-mono font-bold">Time left: </span>
+              <span className="font-mono text-xl">{timeLeft}</span>
+            </div>
           </div>
         </div>
         
@@ -180,17 +189,17 @@ export default function VotePage() {
                   <span className="font-mono font-bold">{submission.voteCount} votes</span>
                   <button 
                     onClick={() => handleVote(submission.id)}
-                    disabled={!!votedSubmissionId}
+                    disabled={votesRemaining <= 0 || votedSubmissionIds.includes(submission.id)}
                     className={`px-4 py-2 border-2 border-black font-mono transition-colors ${
-                      votedSubmissionId === submission.id
+                      votedSubmissionIds.includes(submission.id)
                         ? 'bg-green-500 text-white'
-                        : votedSubmissionId
+                        : votesRemaining <= 0
                         ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                         : 'bg-white hover:bg-black hover:text-white cursor-pointer'
                     }`}
                   >
-                    {votedSubmissionId === submission.id ? 'Voted!' : 
-                     votedSubmissionId ? 'Already Voted' : 'Vote'}
+                    {votedSubmissionIds.includes(submission.id) ? 'Voted!' : 
+                     votesRemaining <= 0 ? 'No Votes Left' : 'Vote'}
                   </button>
                 </div>
               </div>

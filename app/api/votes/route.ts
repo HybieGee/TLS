@@ -77,7 +77,24 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const env = process.env as unknown as Env;
+  // For development, return success without database interaction
+  if (process.env.NODE_ENV === 'development') {
+    return NextResponse.json({
+      success: true,
+      voteId: crypto.randomUUID(),
+      submissionId: 'mock',
+      totalVotes: 1
+    });
+  }
+
+  const env = (request as NextRequest & { env?: Env }).env;
+  
+  if (!env?.DB || !env?.KV_SESSIONS) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
+  }
   
   try {
     const cookieStore = await cookies();
@@ -108,13 +125,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingVote = await env.DB.prepare(
-      'SELECT id FROM Vote WHERE userId = ? AND periodKey = ?'
-    ).bind(session.userId, periodKey).first();
+    // Check if user has already made 3 votes this hour
+    const hourStart = new Date();
+    hourStart.setMinutes(0, 0, 0);
+    const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
+    
+    const existingVotes = await env.DB.prepare(
+      'SELECT COUNT(*) as count FROM Vote WHERE userId = ? AND createdAt >= ? AND createdAt < ?'
+    ).bind(session.userId, hourStart.toISOString(), hourEnd.toISOString()).first();
 
-    if (existingVote) {
+    if (existingVotes && existingVotes.count >= 3) {
       return NextResponse.json(
-        { error: 'You have already voted in this period' },
+        { error: 'You have reached the maximum of 3 votes per hour' },
+        { status: 400 }
+      );
+    }
+
+    // Check if already voted for this specific submission in this period
+    const existingVoteForSubmission = await env.DB.prepare(
+      'SELECT id FROM Vote WHERE userId = ? AND submissionId = ? AND periodKey = ?'
+    ).bind(session.userId, submissionId, periodKey).first();
+
+    if (existingVoteForSubmission) {
+      return NextResponse.json(
+        { error: 'You have already voted for this submission' },
         { status: 400 }
       );
     }

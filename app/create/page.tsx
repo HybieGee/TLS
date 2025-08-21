@@ -44,11 +44,18 @@ export default function CreatePage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set up canvas
+    // Set up canvas only once on mount
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    updateCanvasStyle();
-  }, [updateCanvasStyle]);
+    
+    // Initial canvas style setup
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 1;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }, []); // Remove updateCanvasStyle dependency to prevent clearing
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
@@ -153,28 +160,7 @@ export default function CreatePage() {
           {/* Drawing Tools */}
           <div className="mb-8">
             <h2 className="text-lg font-mono font-bold mb-4">Drawing Tools</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 border border-gray-300">
-              
-              {/* Color Palette */}
-              <div>
-                <label className="block text-sm font-mono font-bold mb-2">Color</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A'].map(color => (
-                    <button
-                      key={color}
-                      className={`w-8 h-8 border-2 ${currentColor === color ? 'border-gray-800 scale-110' : 'border-gray-400'}`}
-                      style={{ backgroundColor: color }}
-                      onClick={() => { setCurrentColor(color); setIsEraser(false); }}
-                    />
-                  ))}
-                </div>
-                <input
-                  type="color"
-                  value={currentColor}
-                  onChange={(e) => { setCurrentColor(e.target.value); setIsEraser(false); }}
-                  className="w-full h-8 border border-gray-300"
-                />
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-gray-50 border border-gray-300">
 
               {/* Brush Size */}
               <div>
@@ -259,13 +245,13 @@ export default function CreatePage() {
                 🗑️ Clear All
               </button>
               <button 
-                onClick={() => {setCurrentColor('#000000'); setBrushSize(3); setOpacity(1); setIsEraser(false); setBrushType('round');}}
+                onClick={() => {setBrushSize(3); setOpacity(1); setIsEraser(false); setBrushType('round');}}
                 className="px-4 py-2 border-2 border-blue-500 bg-white hover:bg-blue-50 text-blue-600 font-mono"
               >
                 🔄 Reset Tools
               </button>
               <span className="px-4 py-2 font-mono text-sm text-gray-600 flex items-center">
-                Full color support • Click and drag to draw • Use tools above
+                Black ink only • Click and drag to draw • Use tools above
               </span>
             </div>
           </div>
