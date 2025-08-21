@@ -192,8 +192,26 @@ export function WelcomeOverlay() {
   const [visible, setVisible] = useState(true);
   
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), 8000);
-    return () => clearTimeout(timer);
+    const handleInteraction = () => {
+      setVisible(false);
+    };
+
+    // Listen for any user interaction
+    const events = ['keydown', 'click', 'mousemove', 'wheel'];
+    
+    events.forEach(event => {
+      document.addEventListener(event, handleInteraction);
+    });
+
+    // Fallback timer in case user doesn't interact
+    const timer = setTimeout(() => setVisible(false), 15000);
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleInteraction);
+      });
+      clearTimeout(timer);
+    };
   }, []);
   
   if (!visible) return null;
