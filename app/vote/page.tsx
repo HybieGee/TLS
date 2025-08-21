@@ -29,8 +29,14 @@ export default function VotePage() {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState('--:--');
 
-  useEffect(() => {
-    fetchCurrentPeriod();
+  const fetchCurrentPeriod = useCallback(async () => {
+    try {
+      const response = await fetch('/api/periods/current');
+      const data = await response.json();
+      setPeriod(data.period);
+    } catch (error) {
+      console.error('Failed to fetch period:', error);
+    }
   }, []);
 
   const fetchSubmissions = useCallback(async () => {
@@ -46,6 +52,10 @@ export default function VotePage() {
       setLoading(false);
     }
   }, [period]);
+
+  useEffect(() => {
+    fetchCurrentPeriod();
+  }, [fetchCurrentPeriod]);
 
   useEffect(() => {
     if (period) {
@@ -74,16 +84,6 @@ export default function VotePage() {
     }, 1000);
     return () => clearInterval(interval);
   }, [period, fetchCurrentPeriod]);
-
-  const fetchCurrentPeriod = async () => {
-    try {
-      const response = await fetch('/api/periods/current');
-      const data = await response.json();
-      setPeriod(data.period);
-    } catch (error) {
-      console.error('Failed to fetch period:', error);
-    }
-  };
 
 
 
