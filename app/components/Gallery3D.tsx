@@ -213,8 +213,8 @@ function MovementControls({ sendPosition }: { sendPosition?: (position: [number,
 function BlenderGallery() {
   const { scene } = useGLTF('/models/Gallery.glb');
   
-  // Load Coming Soon texture
-  const comingSoonTexture = useLoader(THREE.TextureLoader, '/images/coming-soon.svg');
+  // Load Coming Soon texture - your awesome sketch!
+  const comingSoonTexture = useLoader(THREE.TextureLoader, '/images/coming-soon.png');
   
   // Clone scene to add edges and replace artwork textures
   const sceneWithEdges = React.useMemo(() => {
