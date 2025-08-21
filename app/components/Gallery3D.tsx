@@ -242,20 +242,18 @@ function BlenderGallery() {
     // Add edges to each mesh and replace artwork textures
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // Target artwork objects (more comprehensive check)
+        // Target only specific artwork objects for Coming Soon texture
         const childNameLower = child.name.toLowerCase();
         
-        // Apply to all artwork meshes EXCEPT artwork006 (if it exists) 
-        const isArtwork = childNameLower.includes('artwork') && 
-                          !childNameLower.includes('frame') &&
-                          childNameLower !== 'artwork006';
+        // Only apply Coming Soon to these specific artworks
+        const isComingSoonArtwork = childNameLower === 'leftartwork' ||
+                                   childNameLower === 'leftartwork.001' ||
+                                   childNameLower === 'leftartwork.002' ||
+                                   childNameLower === 'rightartwork.003' ||
+                                   childNameLower === 'rightartwork.004' ||
+                                   childNameLower === 'rightartwork.005';
         
-        // Also check for other possible artwork naming patterns
-        const isAlternativeArtwork = childNameLower.includes('art') && 
-                                   !childNameLower.includes('frame') &&
-                                   !childNameLower.includes('wall');
-        
-        if ((isArtwork || isAlternativeArtwork) && comingSoonTexture) {
+        if (isComingSoonArtwork && comingSoonTexture) {
           console.log('✅ Applying Coming Soon texture to:', child.name);
           // Clone texture for rotation
           const rotatedTexture = comingSoonTexture.clone();
