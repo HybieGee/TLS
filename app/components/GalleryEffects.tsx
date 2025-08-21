@@ -271,54 +271,81 @@ export function AnimatedSpotlight() {
   );
 }
 
-// Waving pencil sprite animation
-export function WavingPencil() {
+// 3D Waving pencil sprite in the gallery world
+export function WavingPencil3D() {
   const [currentFrame, setCurrentFrame] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const textureRefs = useRef<THREE.Texture[]>([]);
   
-  // Preload all frames for smooth animation
+  // Load all textures for animation
   useEffect(() => {
-    const preloadImages = async () => {
-      const promises = [];
-      for (let i = 1; i <= 16; i++) {
-        const img = new window.Image();
-        img.src = `/sprites/waving-pencil/${i}.png`;
-        promises.push(new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve; // Don't fail if one image fails
-        }));
-      }
-      await Promise.all(promises);
-      setIsLoaded(true);
-    };
+    const loader = new THREE.TextureLoader();
+    const textures: THREE.Texture[] = [];
+    let loadedCount = 0;
     
-    preloadImages();
+    for (let i = 1; i <= 16; i++) {
+      const texture = loader.load(
+        `/sprites/waving-pencil/${i}.png`,
+        () => {
+          loadedCount++;
+          if (loadedCount === 16) {
+            setIsLoaded(true);
+          }
+        }
+      );
+      texture.minFilter = THREE.NearestFilter;
+      texture.magFilter = THREE.NearestFilter;
+      texture.generateMipmaps = false;
+      textures.push(texture);
+    }
+    
+    textureRefs.current = textures;
+    
+    return () => {
+      textures.forEach(texture => texture.dispose());
+    };
   }, []);
   
+  // Animation loop
   useEffect(() => {
     if (!isLoaded) return;
     
     const interval = setInterval(() => {
-      setCurrentFrame((prev) => (prev >= 16 ? 1 : prev + 1));
-    }, 120); // Slightly slower for better visibility
+      setCurrentFrame((prev) => {
+        const nextFrame = prev >= 16 ? 1 : prev + 1;
+        console.log('Frame:', nextFrame); // Debug log
+        return nextFrame;
+      });
+    }, 150); // 150ms per frame for clear animation
     
     return () => clearInterval(interval);
   }, [isLoaded]);
   
+  // Update texture when frame changes
+  useEffect(() => {
+    if (meshRef.current && textureRefs.current[currentFrame - 1]) {
+      const material = meshRef.current.material as THREE.MeshBasicMaterial;
+      material.map = textureRefs.current[currentFrame - 1];
+      material.needsUpdate = true;
+    }
+  }, [currentFrame]);
+  
   if (!isLoaded) return null;
   
   return (
-    <div className="fixed bottom-4 right-4 z-40 pointer-events-none">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`/sprites/waving-pencil/${currentFrame}.png`}
-        alt="Waving Pencil"
-        className="w-16 h-16 object-contain"
-        style={{
-          imageRendering: 'pixelated', // Keep pixel art crisp
-          filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))'
-        }}
+    <mesh 
+      ref={meshRef} 
+      position={[-10, 1, -7]} // Back left corner of gallery
+      scale={[2, 2, 1]} // Make it bigger
+    >
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial 
+        map={textureRefs.current[0]} 
+        transparent 
+        side={THREE.DoubleSide}
+        alphaTest={0.1}
       />
-    </div>
+    </mesh>
   );
 }
