@@ -217,8 +217,20 @@ function BlenderGallery() {
           // Clone texture for rotation
           const rotatedTexture = comingSoonTexture.clone();
           
-          // Apply ALL the same rotation since they're all sideways
+          // Apply rotation
           rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation for ALL
+          
+          // Flip horizontally for artworks that appear backwards
+          const childNameLower = child.name.toLowerCase();
+          if (childNameLower === 'artwork003' || 
+              childNameLower === 'artwork004' || 
+              childNameLower === 'artwork005' ||
+              childNameLower === 'artwork007') {
+            // Flip texture horizontally to fix backwards text
+            rotatedTexture.wrapS = THREE.RepeatWrapping;
+            rotatedTexture.repeat.x = -1;
+            rotatedTexture.offset.x = 1;
+          }
           
           rotatedTexture.center.set(0.5, 0.5);
           rotatedTexture.needsUpdate = true;
