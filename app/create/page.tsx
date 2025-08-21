@@ -237,13 +237,13 @@ export default function CreatePage() {
           {/* Drawing Canvas */}
           <div className="mb-8">
             <h2 className="text-lg font-mono font-bold mb-4">Draw Your Character</h2>
-            <div className="border-2 border-black mb-4">
+            <div className="border-2 border-black mb-4 inline-block">
               <canvas
                 ref={canvasRef}
                 width={600}
                 height={400}
                 className="cursor-crosshair block"
-                style={{ width: '600px', height: '400px' }}
+                style={{ width: '600px', height: '400px', maxWidth: '100%' }}
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}
