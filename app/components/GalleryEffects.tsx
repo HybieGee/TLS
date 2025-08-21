@@ -270,3 +270,30 @@ export function AnimatedSpotlight() {
     />
   );
 }
+
+// Waving pencil sprite animation
+export function WavingPencil() {
+  const [currentFrame, setCurrentFrame] = useState(1);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFrame((prev) => (prev >= 16 ? 1 : prev + 1));
+    }, 100); // Change frame every 100ms for smooth animation
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  return (
+    <div className="fixed bottom-4 right-4 z-40 pointer-events-none">
+      <img
+        src={`/sprites/waving-pencil/${currentFrame}.png`}
+        alt="Waving Pencil"
+        className="w-16 h-16 object-contain"
+        style={{
+          imageRendering: 'pixelated', // Keep pixel art crisp
+          filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))'
+        }}
+      />
+    </div>
+  );
+}

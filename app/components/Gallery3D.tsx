@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
 import { useGLTF, Float } from '@react-three/drei';
 import React, { Suspense, useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import { FloatingParticles, AnimatedSpotlight, WelcomeOverlay, ProximityGlow, AudioTrigger } from './GalleryEffects';
+import { FloatingParticles, AnimatedSpotlight, WelcomeOverlay, ProximityGlow, AudioTrigger, WavingPencil } from './GalleryEffects';
 
 // FPS Movement Controls with Collision Detection
 function MovementControls() {
@@ -361,6 +361,7 @@ export default function Gallery3D() {
   return (
     <>
       <WelcomeOverlay />
+      <WavingPencil />
       <Canvas
         camera={{ position: [0, 1.6, 6], fov: 60 }}
         style={{ background: '#ffffff' }}
