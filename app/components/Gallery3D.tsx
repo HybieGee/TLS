@@ -178,21 +178,40 @@ function BlenderGallery() {
   const sceneWithEdges = React.useMemo(() => {
     const cloned = scene.clone();
     
+    // Configure texture settings
+    if (comingSoonTexture) {
+      comingSoonTexture.flipY = false;
+      comingSoonTexture.wrapS = THREE.ClampToEdgeWrapping;
+      comingSoonTexture.wrapT = THREE.ClampToEdgeWrapping;
+      comingSoonTexture.needsUpdate = true;
+    }
+    
+    // Debug: List all mesh names
+    console.log('=== Gallery Model Meshes ===');
+    cloned.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        console.log('Mesh name:', child.name, 'Material:', child.material);
+      }
+    });
+    
     // Add edges to each mesh and replace artwork textures
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // Target specific artwork objects by name
-        const artworkNames = ['ArtWork', 'ArtWork001', 'ArtWork002', 'ArtWork003', 'ArtWork004', 'ArtWork005'];
+        // Target specific artwork objects by name - check for various naming patterns
+        const artworkNames = ['ArtWork', 'ArtWork001', 'ArtWork002', 'ArtWork003', 'ArtWork004', 'ArtWork005', 'Artwork', 'artwork', 'plane', 'Plane'];
+        const isArtwork = artworkNames.some(name => child.name.toLowerCase().includes(name.toLowerCase())) || 
+                         child.name.toLowerCase().includes('art') || 
+                         child.name.toLowerCase().includes('frame');
         
-        if (artworkNames.includes(child.name)) {
+        if (isArtwork && comingSoonTexture) {
+          console.log('Applying texture to:', child.name);
           // Clone material to avoid affecting original
-          const mat = child.material as THREE.MeshStandardMaterial;
-          const newMaterial = mat.clone();
-          newMaterial.map = comingSoonTexture;
-          // Apply +90 degree rotation to texture
-          newMaterial.map.rotation = Math.PI / 2;
-          newMaterial.map.center.set(0.5, 0.5);
-          newMaterial.needsUpdate = true;
+          const newMaterial = new THREE.MeshStandardMaterial({
+            map: comingSoonTexture,
+            transparent: false,
+            side: THREE.FrontSide,
+            color: 0xffffff
+          });
           child.material = newMaterial;
         }
         

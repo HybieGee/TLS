@@ -1,7 +1,7 @@
 <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
   <rect width="400" height="300" fill="white" stroke="black" stroke-width="4"/>
-  <text x="200" y="130" text-anchor="middle" font-family="monospace" font-size="24" font-weight="bold" fill="white">COMING</text>
-  <text x="200" y="170" text-anchor="middle" font-family="monospace" font-size="24" font-weight="bold" fill="white">SOON</text>
+  <text x="200" y="130" text-anchor="middle" font-family="monospace" font-size="24" font-weight="bold" fill="black">COMING</text>
+  <text x="200" y="170" text-anchor="middle" font-family="monospace" font-size="24" font-weight="bold" fill="black">SOON</text>
   <circle cx="200" cy="220" r="20" fill="none" stroke="black" stroke-width="3"/>
   <circle cx="200" cy="220" r="10" fill="none" stroke="black" stroke-width="2"/>
   <circle cx="200" cy="220" r="3" fill="black"/>
