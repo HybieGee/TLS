@@ -238,12 +238,16 @@ function GalleryScene() {
     <>
       <MovementControls />
       
-      {/* Maximum brightness for pure white gallery */}
-      <ambientLight intensity={2.5} />
-      <directionalLight position={[5, 8, 5]} intensity={3.0} castShadow />
-      <directionalLight position={[-5, 8, -5]} intensity={2.0} />
-      <directionalLight position={[0, 8, 0]} intensity={1.5} />
-      <pointLight position={[0, 5, 0]} intensity={1.0} />
+      {/* Ultra bright lighting to match Blender render */}
+      <ambientLight intensity={4.0} />
+      <directionalLight position={[5, 10, 5]} intensity={5.0} castShadow />
+      <directionalLight position={[-5, 10, -5]} intensity={4.0} />
+      <directionalLight position={[0, 10, 0]} intensity={3.0} />
+      <directionalLight position={[5, 5, 0]} intensity={2.0} />
+      <directionalLight position={[-5, 5, 0]} intensity={2.0} />
+      <pointLight position={[0, 8, 0]} intensity={2.0} />
+      <pointLight position={[0, 8, 5]} intensity={1.5} />
+      <pointLight position={[0, 8, -5]} intensity={1.5} />
       
       {/* Your Blender Gallery Model (with built-in Coming Soon placeholders) */}
       <BlenderGallery />
@@ -257,6 +261,12 @@ export default function Gallery3D() {
       camera={{ position: [0, 1.6, 6], fov: 60 }}
       style={{ background: '#ffffff' }}
       shadows
+      gl={{ 
+        antialias: true, 
+        toneMapping: THREE.NoToneMapping,
+        outputColorSpace: THREE.SRGBColorSpace,
+        toneMappingExposure: 1.5
+      }}
     >
       <Suspense fallback={null}>
         <GalleryScene />

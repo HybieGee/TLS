@@ -130,14 +130,14 @@ export async function POST(request: NextRequest) {
       imageUrl,
       vectorJson ? JSON.stringify(vectorJson) : null,
       now,
-      'pending'
+      'approved'
     ).run();
 
     return NextResponse.json({
       success: true,
       submissionId,
-      status: 'pending',
-      message: 'Submission received and pending approval'
+      status: 'approved',
+      message: 'Character submitted successfully! It will appear in the next voting period.'
     });
   } catch (error) {
     console.error('Create submission error:', error);

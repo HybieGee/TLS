@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { useRef, useState, useEffect } from 'react';
+import { useNotification } from '@/app/components/Notification';
 
 export default function CreatePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [characterName, setCharacterName] = useState('');
   const [description, setDescription] = useState('');
+  const { showNotification, NotificationComponent } = useNotification();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -76,7 +78,7 @@ export default function CreatePage() {
   const submitCharacter = async () => {
     const canvas = canvasRef.current;
     if (!canvas || !characterName.trim()) {
-      alert('Please enter a character name and draw something!');
+      showNotification('Please enter a character name and draw something!', 'error');
       return;
     }
 
@@ -97,21 +99,22 @@ export default function CreatePage() {
       const data = await response.json();
       
       if (response.ok) {
-        alert('Character submitted successfully! Your artwork is pending approval.');
+        showNotification(data.message || 'Character submitted successfully!', 'success');
         clearCanvas();
         setCharacterName('');
         setDescription('');
       } else {
-        alert(data.error || 'Failed to submit character');
+        showNotification(data.error || 'Failed to submit character', 'error');
       }
     } catch (error) {
       console.error('Submission error:', error);
-      alert('Failed to submit character. Please try again.');
+      showNotification('Failed to submit character. Please try again.', 'error');
     }
   };
 
   return (
     <div className="min-h-screen bg-white p-8">
+      {NotificationComponent}
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold font-mono text-black mb-8">
           Create Your Character
