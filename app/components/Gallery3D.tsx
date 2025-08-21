@@ -222,11 +222,17 @@ function BlenderGallery() {
           const rotatedTexture = comingSoonTexture.clone();
           
           // Apply different rotations based on artwork position/name
-          if (child.name.toLowerCase().includes('artwork007')) {
-            // Artwork007 needs +90 degree rotation (back wall)
+          const childNameLower = child.name.toLowerCase();
+          if (childNameLower.includes('artwork007')) {
+            // Artwork007 try -90 degree rotation (back wall)
+            rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation
+          } else if (childNameLower.includes('artwork001') || 
+                     childNameLower.includes('artwork002') || 
+                     childNameLower.includes('artwork003')) {
+            // Left wall artworks - try +90 to fix mirroring
             rotatedTexture.rotation = Math.PI / 2; // +90 degree rotation
           } else {
-            // Default rotation for side walls
+            // Right wall artworks (keep working as they are)
             rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation
           }
           
