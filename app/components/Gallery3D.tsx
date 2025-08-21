@@ -5,9 +5,12 @@ import { useGLTF, Float } from '@react-three/drei';
 import React, { Suspense, useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { FloatingParticles, AnimatedSpotlight, WelcomeOverlay, AudioTrigger, WavingPencil3D } from './GalleryEffects';
+import { useMultiplayer } from '../hooks/useMultiplayer';
+import { EnhancedPlayerAvatar } from './CustomModelLoader';
+import { CharacterSelector, useCharacterSelector } from './CharacterSelector';
 
 // FPS Movement Controls with Collision Detection
-function MovementControls() {
+function MovementControls({ sendPosition }: { sendPosition?: (position: [number, number, number], rotation: [number, number, number]) => void }) {
   const { camera, gl } = useThree();
   const moveSpeed = 5; // Units per second (not per frame)
   const lookSpeed = 0.002;
@@ -193,6 +196,14 @@ function MovementControls() {
       // Keep camera at eye level when not jumping
       camera.position.y = jumpState.current.groundLevel;
     }
+
+    // Send position updates for multiplayer (throttled to ~10 updates per second)
+    if (sendPosition && Math.random() < 0.1) {
+      sendPosition(
+        [camera.position.x, camera.position.y, camera.position.z],
+        [camera.rotation.x, camera.rotation.y, camera.rotation.z]
+      );
+    }
   });
 
   return null;
@@ -313,9 +324,26 @@ function BlenderGallery() {
 useGLTF.preload('/models/Gallery.glb');
 
 function GalleryScene() {
+  const { characterData } = useCharacterSelector();
+  
+  // Initialize multiplayer connection with character data
+  const { players, isConnected, sendPosition, updateCharacter } = useMultiplayer({
+    roomId: 'main-gallery',
+    playerName: characterData.name || `Guest_${Math.floor(Math.random() * 1000)}`,
+    playerModel: characterData.model,
+    playerColor: characterData.color
+  });
+
+  // Update character when data changes
+  useEffect(() => {
+    if (characterData.model && characterData.color) {
+      updateCharacter(characterData.model, characterData.color, characterData.name);
+    }
+  }, [characterData, updateCharacter]);
+
   return (
     <>
-      <MovementControls />
+      <MovementControls sendPosition={sendPosition} />
       <AudioTrigger />
       
       {/* Ultra bright lighting to match Blender render */}
@@ -349,14 +377,62 @@ function GalleryScene() {
       
       {/* Animated 3D pencil character */}
       <WavingPencil3D />
+      
+      {/* Render other players */}
+      {players.map(player => (
+        <EnhancedPlayerAvatar
+          key={player.id}
+          position={player.position}
+          color={player.color}
+          name={player.name}
+          model={player.model}
+        />
+      ))}
+      
+      {/* Debug info for multiplayer status */}
+      {isConnected && (
+        <group position={[0, 3, 0]}>
+          {/* Simple text indication - you could replace with proper 3D text */}
+          <mesh>
+            <boxGeometry args={[0.1, 0.1, 0.1]} />
+            <meshStandardMaterial color="green" />
+          </mesh>
+        </group>
+      )}
     </>
   );
 }
 
 export default function Gallery3D() {
+  const { 
+    isOpen, 
+    openSelector, 
+    closeSelector, 
+    characterData, 
+    handleCharacterChange 
+  } = useCharacterSelector();
+
   return (
     <>
       <WelcomeOverlay />
+      
+      {/* Character selection button */}
+      <div className="absolute top-4 right-4 z-40">
+        <button
+          onClick={openSelector}
+          className="bg-white border-2 border-black px-4 py-2 font-bold hover:bg-gray-100 rounded"
+        >
+          Character ({characterData.name || 'Guest'})
+        </button>
+      </div>
+      
+      {/* Character selector modal */}
+      <CharacterSelector
+        isOpen={isOpen}
+        onClose={closeSelector}
+        onCharacterChange={handleCharacterChange}
+      />
+      
       <Canvas
         camera={{ position: [0, 1.6, 6], fov: 60 }}
         style={{ background: '#ffffff' }}

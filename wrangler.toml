@@ -29,3 +29,14 @@ id = "9167733127d44c968545b4d173a54ccf"
 
 [env.production.vars]
 SESSION_COOKIE_NAME = "sb_session"
+
+# Durable Objects for multiplayer
+[[durable_objects.bindings]]
+name = "GALLERY_ROOMS"
+class_name = "GalleryRoom"
+script_name = "living-sketchbook"
+
+[[env.production.durable_objects.bindings]]
+name = "GALLERY_ROOMS"
+class_name = "GalleryRoom"
+script_name = "living-sketchbook"
