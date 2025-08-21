@@ -147,7 +147,7 @@ export function FloatingParticles() {
   return (
     <points ref={particlesRef} geometry={particles}>
       <pointsMaterial
-        color="#888888"
+        color="#000000"
         size={0.05}
         transparent
         opacity={0.6}
