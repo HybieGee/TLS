@@ -2,6 +2,19 @@ name = "living-sketchbook"
 compatibility_date = "2025-08-01"
 pages_build_output_dir = ".vercel/output/static"
 
+[[d1_databases]]
+binding = "DB"
+database_name = "sketchbook-db"
+database_id = "local-dev-db"
+
+[[kv_namespaces]]
+binding = "KV_SESSIONS"
+id = "local-sessions"
+preview_id = "local-sessions"
+
+[vars]
+SESSION_COOKIE_NAME = "sb_session"
+
 [env.production]
 compatibility_flags = ["nodejs_compat"]
 

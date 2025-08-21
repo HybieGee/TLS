@@ -80,17 +80,34 @@ export default function CreatePage() {
       return;
     }
 
-    // Convert canvas to data URL
     const imageData = canvas.toDataURL('image/png');
     
-    // TODO: Send to API endpoint
-    console.log({
-      name: characterName,
-      description: description,
-      imageData: imageData
-    });
+    try {
+      const response = await fetch('/api/submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: characterName,
+          description: description || 'A unique character for the Living Sketchbook',
+          imageData: imageData,
+          vectorJson: null
+        })
+      });
 
-    alert('Character submitted! (API integration coming soon)');
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert('Character submitted successfully! Your artwork is pending approval.');
+        clearCanvas();
+        setCharacterName('');
+        setDescription('');
+      } else {
+        alert(data.error || 'Failed to submit character');
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('Failed to submit character. Please try again.');
+    }
   };
 
   return (
