@@ -344,28 +344,6 @@ function GalleryScene() {
         <BlenderGallery />
       </Float>
       
-      {/* Interactive text hints */}
-      <Text
-        position={[0, 4, 0]}
-        fontSize={0.3}
-        color="black"
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.02}
-        outlineColor="white"
-      >
-        THE LIVING SKETCHBOOK
-      </Text>
-      
-      <Text
-        position={[0, 3.5, 0]}
-        fontSize={0.15}
-        color="#666666"
-        anchorX="center"
-        anchorY="middle"
-      >
-        Explore • Vote • Create
-      </Text>
       
       {/* Proximity glow effects for artworks */}
       <ProximityGlow position={[-8, 1.5, -3]} name="Artwork001" />
