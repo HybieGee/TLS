@@ -203,15 +203,14 @@ function BlenderGallery() {
         // Target only specific artwork objects
         const childNameLower = child.name.toLowerCase();
         // Only apply to specific artworks, excluding Artwork006
-        const isArtwork = (childNameLower === 'artwork' ||
+        const isArtwork = childNameLower === 'artwork' ||
                           childNameLower === 'artwork001' ||
                           childNameLower === 'artwork002' ||
                           childNameLower === 'artwork003' ||
                           childNameLower === 'artwork004' ||
                           childNameLower === 'artwork005' ||
-                          childNameLower === 'artwork007') &&
-                         // Double check - NO Artwork006
-                         childNameLower !== 'artwork006';
+                          childNameLower === 'artwork007';
+        // Artwork006 is excluded by not being in the list above
         
         if (isArtwork && comingSoonTexture) {
           console.log('Applying texture to:', child.name);
