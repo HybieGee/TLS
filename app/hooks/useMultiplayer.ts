@@ -31,7 +31,6 @@ export function useMultiplayer(config: MultiplayerConfig = {}) {
   const {
     roomId = 'main',
     playerName = 'Guest',
-    playerModel = 'stick',
     playerColor = '#333333'
   } = config;
 

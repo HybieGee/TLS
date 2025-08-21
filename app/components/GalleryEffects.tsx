@@ -149,7 +149,7 @@ export function FloatingParticles() {
     if (meshRef.current) {
       meshRef.current.rotation.y += 0.0001;
       
-      meshRef.current.children.forEach((child, i) => {
+      meshRef.current.children.forEach((child) => {
         const mesh = child as THREE.Mesh;
         const userData = mesh.userData;
         

@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
   }
 
   // For production, access Cloudflare bindings through context
-  const env = (request as any).env as Env;
+  const env = (request as NextRequest & { env?: Env }).env;
   
   try {
     const userId = crypto.randomUUID();
