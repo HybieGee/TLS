@@ -449,10 +449,22 @@ export default function Gallery3D() {
           toneMappingExposure: 1.5
         }}
       >
-        <Suspense fallback={null}>
+        <Suspense fallback={
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[0.5, 0.5, 0.5]} />
+            <meshBasicMaterial color="#cccccc" />
+          </mesh>
+        }>
           <GalleryScene />
         </Suspense>
       </Canvas>
+      
+      {/* Loading overlay */}
+      <div className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center">
+        <div className="bg-white border-2 border-black p-4 animate-pulse">
+          <p className="font-mono text-sm">Loading Gallery...</p>
+        </div>
+      </div>
     </>
   );
 }

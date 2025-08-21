@@ -315,11 +315,13 @@ export function WavingPencil3D() {
   const [isLoaded, setIsLoaded] = useState(false);
   const meshRef = useRef<THREE.Mesh>(null);
   const textureRefs = useRef<THREE.Texture[]>([]);
+  const materialRefs = useRef<THREE.MeshBasicMaterial[]>([]);
   
-  // Load all textures for animation
+  // Load all textures and create all materials for animation
   useEffect(() => {
     const loader = new THREE.TextureLoader();
     const textures: THREE.Texture[] = [];
+    const materials: THREE.MeshBasicMaterial[] = [];
     let loadedCount = 0;
     
     for (let i = 1; i <= 16; i++) {
@@ -328,6 +330,22 @@ export function WavingPencil3D() {
         () => {
           loadedCount++;
           if (loadedCount === 16) {
+            // Create all materials once textures are loaded
+            materials.length = 0; // Clear array
+            textures.forEach(texture => {
+              const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                opacity: 1.0,
+                side: THREE.DoubleSide,
+                alphaTest: 0.1,
+                premultipliedAlpha: false,
+                depthWrite: true,
+                color: 0xffffff
+              });
+              materials.push(material);
+            });
+            materialRefs.current = materials;
             setIsLoaded(true);
           }
         }
@@ -343,6 +361,7 @@ export function WavingPencil3D() {
     
     return () => {
       textures.forEach(texture => texture.dispose());
+      materials.forEach(material => material.dispose());
     };
   }, []);
   
@@ -361,27 +380,10 @@ export function WavingPencil3D() {
     return () => clearInterval(interval);
   }, [isLoaded]);
   
-  // Update texture when frame changes
+  // Update material when frame changes (use preloaded materials)
   useEffect(() => {
-    if (meshRef.current && textureRefs.current[currentFrame - 1]) {
-      const newTexture = textureRefs.current[currentFrame - 1];
-      
-      // Create a fresh material for each frame to prevent flashing
-      const newMaterial = new THREE.MeshBasicMaterial({
-        map: newTexture,
-        transparent: true,
-        opacity: 1.0,
-        side: THREE.DoubleSide,
-        alphaTest: 0.1,
-        premultipliedAlpha: false,
-        depthWrite: true,
-        color: 0xffffff
-      });
-      
-      // Dispose old material and assign new one
-      const oldMaterial = meshRef.current.material as THREE.MeshBasicMaterial;
-      oldMaterial.dispose();
-      meshRef.current.material = newMaterial;
+    if (meshRef.current && materialRefs.current[currentFrame - 1]) {
+      meshRef.current.material = materialRefs.current[currentFrame - 1];
     }
   }, [currentFrame]);
   
