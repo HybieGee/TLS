@@ -416,11 +416,11 @@ export default function Gallery3D() {
     <>
       <WelcomeOverlay />
       
-      {/* Character selection button */}
-      <div className="absolute top-4 left-4 z-40">
+      {/* Character selection button - BOTTOM LEFT */}
+      <div className="fixed bottom-6 left-6 z-50">
         <button
           onClick={openSelector}
-          className="bg-white border-2 border-black px-4 py-2 font-bold hover:bg-gray-100 rounded"
+          className="bg-white border-2 border-black px-4 py-2 font-bold hover:bg-gray-100 rounded shadow-lg"
         >
           Character ({characterData.name || 'Guest'})
         </button>
