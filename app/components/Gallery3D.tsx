@@ -201,32 +201,42 @@ function BlenderGallery() {
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         // Target only artwork objects, exclude all frames
-        const artworkNames = ['ArtWork', 'Artwork', 'artwork', 'plane', 'Plane', 'Canvas', 'canvas', 'Picture', 'picture', 'Image', 'image'];
         const childNameLower = child.name.toLowerCase();
-        const isArtwork = (artworkNames.some(name => childNameLower.includes(name.toLowerCase())) || 
-                          childNameLower.includes('art') ||
+        const isArtwork = (childNameLower.includes('art') ||
                           childNameLower.includes('canvas') ||
                           childNameLower.includes('picture') ||
                           childNameLower.includes('image') ||
-                          childNameLower.includes('plane')) &&
-                         // Exclude ALL frames
+                          childNameLower.includes('plane') ||
+                          childNameLower.startsWith('artwork') ||
+                          childNameLower.match(/artwork\d+/)) &&
+                         // Exclude structural elements and frames
                          !childNameLower.includes('frame') &&
                          !childNameLower.includes('wall') &&
                          !childNameLower.includes('floor') &&
-                         !childNameLower.includes('ceiling');
+                         !childNameLower.includes('ceiling') &&
+                         !childNameLower.includes('room');
         
         if (isArtwork && comingSoonTexture) {
           console.log('Applying texture to:', child.name);
           // Clone texture for rotation
           const rotatedTexture = comingSoonTexture.clone();
-          rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation
+          
+          // Apply different rotations based on artwork position/name
+          if (child.name.toLowerCase().includes('artwork007')) {
+            // Artwork007 needs different rotation (back wall)
+            rotatedTexture.rotation = Math.PI / 2; // +90 degree rotation
+          } else {
+            // Default rotation for side walls
+            rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation
+          }
+          
           rotatedTexture.center.set(0.5, 0.5);
           rotatedTexture.needsUpdate = true;
           
           const newMaterial = new THREE.MeshStandardMaterial({
             map: rotatedTexture,
             transparent: false,
-            side: THREE.FrontSide,
+            side: THREE.DoubleSide, // Show on both sides to help with visibility
             color: 0xffffff
           });
           child.material = newMaterial;
