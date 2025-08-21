@@ -200,42 +200,26 @@ function BlenderGallery() {
     // Add edges to each mesh and replace artwork textures
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // Target only artwork objects, exclude all frames
+        // Target only specific artwork objects
         const childNameLower = child.name.toLowerCase();
-        const isArtwork = (childNameLower.includes('art') ||
-                          childNameLower.includes('canvas') ||
-                          childNameLower.includes('picture') ||
-                          childNameLower.includes('image') ||
-                          childNameLower.includes('plane') ||
-                          childNameLower.startsWith('artwork') ||
-                          childNameLower.match(/artwork\d+/)) &&
-                         // Exclude structural elements, frames, and Artwork006
-                         !childNameLower.includes('frame') &&
-                         !childNameLower.includes('wall') &&
-                         !childNameLower.includes('floor') &&
-                         !childNameLower.includes('ceiling') &&
-                         !childNameLower.includes('room') &&
-                         !childNameLower.includes('artwork006');
+        // Only apply to specific artworks, excluding Artwork006
+        const isArtwork = (childNameLower === 'artwork' ||
+                          childNameLower === 'artwork001' ||
+                          childNameLower === 'artwork002' ||
+                          childNameLower === 'artwork003' ||
+                          childNameLower === 'artwork004' ||
+                          childNameLower === 'artwork005' ||
+                          childNameLower === 'artwork007') &&
+                         // Double check - NO Artwork006
+                         childNameLower !== 'artwork006';
         
         if (isArtwork && comingSoonTexture) {
           console.log('Applying texture to:', child.name);
           // Clone texture for rotation
           const rotatedTexture = comingSoonTexture.clone();
           
-          // Apply different rotations based on artwork position/name
-          const childNameLower = child.name.toLowerCase();
-          if (childNameLower.includes('artwork007')) {
-            // Artwork007 try -90 degree rotation (back wall)
-            rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation
-          } else if (childNameLower.includes('artwork001') || 
-                     childNameLower.includes('artwork002') || 
-                     childNameLower.includes('artwork003')) {
-            // Left wall artworks - try +90 to fix mirroring
-            rotatedTexture.rotation = Math.PI / 2; // +90 degree rotation
-          } else {
-            // Right wall artworks (keep working as they are)
-            rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation
-          }
+          // Apply rotation - default -90 degrees for all
+          rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation
           
           rotatedTexture.center.set(0.5, 0.5);
           rotatedTexture.needsUpdate = true;
