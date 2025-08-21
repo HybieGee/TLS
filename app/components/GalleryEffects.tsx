@@ -5,81 +5,57 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
 
-// Enhanced audio system with ambient music using Web Audio API
+// Enhanced audio system with actual MP3 music file
 function useGalleryAudio() {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
   const lastFootstepTime = useRef(0);
-  const musicNodesRef = useRef<{ oscillator: OscillatorNode; gain: GainNode }[]>([]);
+  const musicRef = useRef<HTMLAudioElement | null>(null);
 
-  const startAmbientMusic = (context: AudioContext) => {
-    // Create a simple ambient melody using multiple oscillators
-    const notes = [
-      { freq: 130.81, delay: 0 },     // C3
-      { freq: 146.83, delay: 0.5 },   // D3
-      { freq: 164.81, delay: 1 },     // E3
-      { freq: 174.61, delay: 1.5 },   // F3
-      { freq: 196.00, delay: 2 },     // G3
-      { freq: 174.61, delay: 2.5 },   // F3
-      { freq: 164.81, delay: 3 },     // E3
-      { freq: 146.83, delay: 3.5 },   // D3
-    ];
-
-    notes.forEach(({ freq, delay }) => {
-      const oscillator = context.createOscillator();
-      const gainNode = context.createGain();
-      const filterNode = context.createBiquadFilter();
+  const startAmbientMusic = async () => {
+    if (musicRef.current) return;
+    
+    // Create audio element for the gallery music
+    const music = new Audio('/audio/gallery-music.mp3');
+    music.loop = true;
+    music.volume = 0; // Start at 0 for fade in
+    musicRef.current = music;
+    
+    try {
+      await music.play();
       
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(freq, context.currentTime);
+      // Fade in over 3 seconds
+      let fadeVolume = 0;
+      const fadeIn = setInterval(() => {
+        fadeVolume += 0.01;
+        if (fadeVolume >= 0.3) { // Max volume at 0.3 for ambient level
+          music.volume = 0.3;
+          clearInterval(fadeIn);
+        } else {
+          music.volume = fadeVolume;
+        }
+      }, 30); // 3000ms / 100 steps = 30ms per step
       
-      filterNode.type = 'lowpass';
-      filterNode.frequency.setValueAtTime(400, context.currentTime);
+      // Handle loop with fade out/in at the end
+      music.addEventListener('timeupdate', () => {
+        const fadeTime = 3; // 3 seconds fade
+        const remainingTime = music.duration - music.currentTime;
+        
+        // Start fade out when 3 seconds remain
+        if (remainingTime <= fadeTime && remainingTime > 0 && music.volume > 0) {
+          music.volume = Math.max(0, (remainingTime / fadeTime) * 0.3);
+        }
+        
+        // Fade back in at the start of the loop
+        if (music.currentTime <= fadeTime && music.volume < 0.3) {
+          music.volume = Math.min(0.3, (music.currentTime / fadeTime) * 0.3);
+        }
+      });
       
-      // Very quiet ambient sound
-      gainNode.gain.setValueAtTime(0, context.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.02, context.currentTime + delay);
-      gainNode.gain.linearRampToValueAtTime(0.02, context.currentTime + delay + 0.4);
-      gainNode.gain.linearRampToValueAtTime(0, context.currentTime + delay + 0.5);
-      
-      oscillator.connect(filterNode);
-      filterNode.connect(gainNode);
-      gainNode.connect(context.destination);
-      
-      oscillator.start(context.currentTime + delay);
-      oscillator.stop(context.currentTime + 4);
-      
-      musicNodesRef.current.push({ oscillator, gain: gainNode });
-    });
-
-    // Loop the melody every 4 seconds
-    setInterval(() => {
-      if (context.state === 'running') {
-        notes.forEach(({ freq, delay }) => {
-          const oscillator = context.createOscillator();
-          const gainNode = context.createGain();
-          const filterNode = context.createBiquadFilter();
-          
-          oscillator.type = 'sine';
-          oscillator.frequency.setValueAtTime(freq, context.currentTime);
-          
-          filterNode.type = 'lowpass';
-          filterNode.frequency.setValueAtTime(400, context.currentTime);
-          
-          gainNode.gain.setValueAtTime(0, context.currentTime);
-          gainNode.gain.linearRampToValueAtTime(0.02, context.currentTime + delay);
-          gainNode.gain.linearRampToValueAtTime(0.02, context.currentTime + delay + 0.4);
-          gainNode.gain.linearRampToValueAtTime(0, context.currentTime + delay + 0.5);
-          
-          oscillator.connect(filterNode);
-          filterNode.connect(gainNode);
-          gainNode.connect(context.destination);
-          
-          oscillator.start(context.currentTime + delay);
-          oscillator.stop(context.currentTime + 4);
-        });
-      }
-    }, 4000);
+      console.log('Gallery music started');
+    } catch (error) {
+      console.log('Could not play music:', error);
+    }
   };
 
   const enableAudio = async () => {
@@ -88,7 +64,7 @@ function useGalleryAudio() {
         const context = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
         setAudioContext(context);
         setIsAudioEnabled(true);
-        startAmbientMusic(context);
+        await startAmbientMusic();
         console.log('Audio and ambient music enabled');
       } catch {
         console.log('Audio not supported');
