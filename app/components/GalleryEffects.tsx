@@ -364,13 +364,24 @@ export function WavingPencil3D() {
   // Update texture when frame changes
   useEffect(() => {
     if (meshRef.current && textureRefs.current[currentFrame - 1]) {
-      const material = meshRef.current.material as THREE.MeshBasicMaterial;
       const newTexture = textureRefs.current[currentFrame - 1];
-      material.map = newTexture;
-      material.opacity = 1.0; // Ensure consistent opacity
-      material.transparent = true; // Keep transparency consistent
-      material.color.set(0xffffff); // Keep color consistent
-      material.needsUpdate = true;
+      
+      // Create a fresh material for each frame to prevent flashing
+      const newMaterial = new THREE.MeshBasicMaterial({
+        map: newTexture,
+        transparent: true,
+        opacity: 1.0,
+        side: THREE.DoubleSide,
+        alphaTest: 0.1,
+        premultipliedAlpha: false,
+        depthWrite: true,
+        color: 0xffffff
+      });
+      
+      // Dispose old material and assign new one
+      const oldMaterial = meshRef.current.material as THREE.MeshBasicMaterial;
+      oldMaterial.dispose();
+      meshRef.current.material = newMaterial;
     }
   }, [currentFrame]);
   
