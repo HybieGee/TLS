@@ -33,8 +33,10 @@ export default function CreatePage() {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -50,8 +52,10 @@ export default function CreatePage() {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -129,7 +133,8 @@ export default function CreatePage() {
                 ref={canvasRef}
                 width={600}
                 height={400}
-                className="cursor-crosshair"
+                className="cursor-crosshair block"
+                style={{ width: '600px', height: '400px' }}
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}
