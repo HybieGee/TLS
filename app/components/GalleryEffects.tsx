@@ -5,11 +5,82 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
 
-// Simplified audio system using Web Audio API
+// Enhanced audio system with ambient music using Web Audio API
 function useGalleryAudio() {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
   const lastFootstepTime = useRef(0);
+  const musicNodesRef = useRef<{ oscillator: OscillatorNode; gain: GainNode }[]>([]);
+
+  const startAmbientMusic = (context: AudioContext) => {
+    // Create a simple ambient melody using multiple oscillators
+    const notes = [
+      { freq: 130.81, delay: 0 },     // C3
+      { freq: 146.83, delay: 0.5 },   // D3
+      { freq: 164.81, delay: 1 },     // E3
+      { freq: 174.61, delay: 1.5 },   // F3
+      { freq: 196.00, delay: 2 },     // G3
+      { freq: 174.61, delay: 2.5 },   // F3
+      { freq: 164.81, delay: 3 },     // E3
+      { freq: 146.83, delay: 3.5 },   // D3
+    ];
+
+    notes.forEach(({ freq, delay }) => {
+      const oscillator = context.createOscillator();
+      const gainNode = context.createGain();
+      const filterNode = context.createBiquadFilter();
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(freq, context.currentTime);
+      
+      filterNode.type = 'lowpass';
+      filterNode.frequency.setValueAtTime(400, context.currentTime);
+      
+      // Very quiet ambient sound
+      gainNode.gain.setValueAtTime(0, context.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.02, context.currentTime + delay);
+      gainNode.gain.linearRampToValueAtTime(0.02, context.currentTime + delay + 0.4);
+      gainNode.gain.linearRampToValueAtTime(0, context.currentTime + delay + 0.5);
+      
+      oscillator.connect(filterNode);
+      filterNode.connect(gainNode);
+      gainNode.connect(context.destination);
+      
+      oscillator.start(context.currentTime + delay);
+      oscillator.stop(context.currentTime + 4);
+      
+      musicNodesRef.current.push({ oscillator, gain: gainNode });
+    });
+
+    // Loop the melody every 4 seconds
+    setInterval(() => {
+      if (context.state === 'running') {
+        notes.forEach(({ freq, delay }) => {
+          const oscillator = context.createOscillator();
+          const gainNode = context.createGain();
+          const filterNode = context.createBiquadFilter();
+          
+          oscillator.type = 'sine';
+          oscillator.frequency.setValueAtTime(freq, context.currentTime);
+          
+          filterNode.type = 'lowpass';
+          filterNode.frequency.setValueAtTime(400, context.currentTime);
+          
+          gainNode.gain.setValueAtTime(0, context.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.02, context.currentTime + delay);
+          gainNode.gain.linearRampToValueAtTime(0.02, context.currentTime + delay + 0.4);
+          gainNode.gain.linearRampToValueAtTime(0, context.currentTime + delay + 0.5);
+          
+          oscillator.connect(filterNode);
+          filterNode.connect(gainNode);
+          gainNode.connect(context.destination);
+          
+          oscillator.start(context.currentTime + delay);
+          oscillator.stop(context.currentTime + 4);
+        });
+      }
+    }, 4000);
+  };
 
   const enableAudio = async () => {
     if (!isAudioEnabled) {
@@ -17,7 +88,8 @@ function useGalleryAudio() {
         const context = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
         setAudioContext(context);
         setIsAudioEnabled(true);
-        console.log('Audio enabled');
+        startAmbientMusic(context);
+        console.log('Audio and ambient music enabled');
       } catch {
         console.log('Audio not supported');
       }
@@ -241,7 +313,7 @@ export function WelcomeOverlay() {
             </ul>
           </div>
         </div>
-        <p className="font-mono text-xs mt-4 text-gray-600">Audio starts after your first click or keypress...</p>
+        <p className="font-mono text-xs mt-4 text-gray-600">Music & audio starts after your first click or keypress...</p>
       </div>
     </div>
   );
