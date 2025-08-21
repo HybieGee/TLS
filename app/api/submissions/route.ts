@@ -15,10 +15,21 @@ interface D1Database {
 }
 
 interface D1PreparedStatement {
-  bind: (...values: any[]) => D1PreparedStatement;
-  run: () => Promise<any>;
-  first: () => Promise<any>;
-  all: () => Promise<any>;
+  bind: (...values: unknown[]) => D1PreparedStatement;
+  run: () => Promise<D1Result>;
+  first: () => Promise<Record<string, unknown> | null>;
+  all: () => Promise<D1ResultSet>;
+}
+
+interface D1Result {
+  success: boolean;
+  meta: Record<string, unknown>;
+}
+
+interface D1ResultSet {
+  results: Record<string, unknown>[];
+  success: boolean;
+  meta: Record<string, unknown>;
 }
 
 interface KVNamespace {
@@ -27,7 +38,7 @@ interface KVNamespace {
 }
 
 interface R2Bucket {
-  put: (key: string, value: ArrayBuffer | ArrayBufferView | string | ReadableStream, options?: any) => Promise<void>;
+  put: (key: string, value: ArrayBuffer | ArrayBufferView | string | ReadableStream, options?: Record<string, unknown>) => Promise<void>;
 }
 
 export async function GET(request: NextRequest) {

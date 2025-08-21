@@ -92,6 +92,7 @@ export default function HallPage() {
                   
                   <div className="aspect-square border border-gray-300 bg-gray-50 mb-4 overflow-hidden relative">
                     {winner.imageUrl.startsWith('data:') ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img 
                         src={winner.imageUrl} 
                         alt={winner.name}

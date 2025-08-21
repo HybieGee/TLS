@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Submission {
   id: string;
@@ -33,12 +33,25 @@ export default function VotePage() {
     fetchCurrentPeriod();
   }, []);
 
+  const fetchSubmissions = useCallback(async () => {
+    if (!period) return;
+    
+    try {
+      const response = await fetch(`/api/votes?period=${period.key}`);
+      const data = await response.json();
+      setSubmissions(data.submissions || []);
+    } catch (error) {
+      console.error('Failed to fetch submissions:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [period]);
+
   useEffect(() => {
     if (period) {
       fetchSubmissions();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period]);
+  }, [period, fetchSubmissions]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -60,8 +73,7 @@ export default function VotePage() {
       }
     }, 1000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period]);
+  }, [period, fetchCurrentPeriod]);
 
   const fetchCurrentPeriod = async () => {
     try {
@@ -73,19 +85,6 @@ export default function VotePage() {
     }
   };
 
-  const fetchSubmissions = async () => {
-    if (!period) return;
-    
-    try {
-      const response = await fetch(`/api/votes?period=${period.key}`);
-      const data = await response.json();
-      setSubmissions(data.submissions || []);
-    } catch (error) {
-      console.error('Failed to fetch submissions:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
 
   const handleVote = async (submissionId: string) => {
@@ -153,6 +152,7 @@ export default function VotePage() {
               <div key={submission.id} className="border-2 border-black bg-white p-4">
                 <div className="aspect-square border border-gray-300 bg-gray-50 mb-4 overflow-hidden relative">
                   {submission.imageUrl.startsWith('data:') ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img 
                       src={submission.imageUrl} 
                       alt={submission.name}

@@ -11,10 +11,21 @@ interface D1Database {
 }
 
 interface D1PreparedStatement {
-  bind: (...values: any[]) => D1PreparedStatement;
-  run: () => Promise<any>;
-  first: () => Promise<any>;
-  all: () => Promise<any>;
+  bind: (...values: unknown[]) => D1PreparedStatement;
+  run: () => Promise<D1Result>;
+  first: () => Promise<Record<string, unknown> | null>;
+  all: () => Promise<D1ResultSet>;
+}
+
+interface D1Result {
+  success: boolean;
+  meta: Record<string, unknown>;
+}
+
+interface D1ResultSet {
+  results: Record<string, unknown>[];
+  success: boolean;
+  meta: Record<string, unknown>;
 }
 
 export async function GET() {
