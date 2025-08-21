@@ -209,12 +209,13 @@ function BlenderGallery() {
                           childNameLower.includes('plane') ||
                           childNameLower.startsWith('artwork') ||
                           childNameLower.match(/artwork\d+/)) &&
-                         // Exclude structural elements and frames
+                         // Exclude structural elements, frames, and Artwork006
                          !childNameLower.includes('frame') &&
                          !childNameLower.includes('wall') &&
                          !childNameLower.includes('floor') &&
                          !childNameLower.includes('ceiling') &&
-                         !childNameLower.includes('room');
+                         !childNameLower.includes('room') &&
+                         !childNameLower.includes('artwork006');
         
         if (isArtwork && comingSoonTexture) {
           console.log('Applying texture to:', child.name);
