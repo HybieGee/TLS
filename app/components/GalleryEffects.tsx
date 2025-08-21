@@ -4,6 +4,7 @@ import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
+import Image from 'next/image';
 
 // Simplified audio system using Web Audio API
 function useGalleryAudio() {
@@ -285,14 +286,18 @@ export function WavingPencil() {
   
   return (
     <div className="fixed bottom-4 right-4 z-40 pointer-events-none">
-      <img
+      <Image
         src={`/sprites/waving-pencil/${currentFrame}.png`}
         alt="Waving Pencil"
-        className="w-16 h-16 object-contain"
+        width={64}
+        height={64}
+        className="object-contain"
         style={{
           imageRendering: 'pixelated', // Keep pixel art crisp
           filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))'
         }}
+        priority={false}
+        unoptimized={true} // Keep sprites unoptimized for pixel art
       />
     </div>
   );

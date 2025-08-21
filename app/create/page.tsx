@@ -18,19 +18,6 @@ export default function CreatePage() {
   const [isEraser, setIsEraser] = useState(false);
   const [brushType, setBrushType] = useState('round');
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set up canvas
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    updateCanvasStyle();
-  }, [updateCanvasStyle]);
-
   const updateCanvasStyle = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
@@ -49,6 +36,19 @@ export default function CreatePage() {
     ctx.lineCap = brushType === 'square' ? 'square' : 'round';
     ctx.lineJoin = 'round';
   }, [isEraser, brushSize, currentColor, opacity, brushType]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set up canvas
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    updateCanvasStyle();
+  }, [updateCanvasStyle]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
