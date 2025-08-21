@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNotification } from '@/app/components/Notification';
 
 export default function CreatePage() {
@@ -10,6 +10,13 @@ export default function CreatePage() {
   const [characterName, setCharacterName] = useState('');
   const [description, setDescription] = useState('');
   const { showNotification, NotificationComponent } = useNotification();
+  
+  // Drawing tool state
+  const [currentColor, setCurrentColor] = useState('#000000');
+  const [brushSize, setBrushSize] = useState(3);
+  const [opacity, setOpacity] = useState(1);
+  const [isEraser, setIsEraser] = useState(false);
+  const [brushType, setBrushType] = useState('round');
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -18,20 +25,38 @@ export default function CreatePage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set up canvas for black & white drawing
+    // Set up canvas
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
+    updateCanvasStyle();
+  }, [updateCanvasStyle]);
+
+  const updateCanvasStyle = useCallback(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!ctx) return;
+
+    if (isEraser) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = brushSize * 2; // Eraser is bigger
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = currentColor;
+      ctx.lineWidth = brushSize;
+      ctx.globalAlpha = opacity;
+    }
+    
+    ctx.lineCap = brushType === 'square' ? 'square' : 'round';
     ctx.lineJoin = 'round';
-  }, []);
+  }, [isEraser, brushSize, currentColor, opacity, brushType]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    updateCanvasStyle();
+    
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
@@ -125,6 +150,90 @@ export default function CreatePage() {
         </h1>
         
         <div className="border-2 border-black p-8 bg-white">
+          {/* Drawing Tools */}
+          <div className="mb-8">
+            <h2 className="text-lg font-mono font-bold mb-4">Drawing Tools</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 border border-gray-300">
+              
+              {/* Color Palette */}
+              <div>
+                <label className="block text-sm font-mono font-bold mb-2">Color</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A'].map(color => (
+                    <button
+                      key={color}
+                      className={`w-8 h-8 border-2 ${currentColor === color ? 'border-gray-800 scale-110' : 'border-gray-400'}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => { setCurrentColor(color); setIsEraser(false); }}
+                    />
+                  ))}
+                </div>
+                <input
+                  type="color"
+                  value={currentColor}
+                  onChange={(e) => { setCurrentColor(e.target.value); setIsEraser(false); }}
+                  className="w-full h-8 border border-gray-300"
+                />
+              </div>
+
+              {/* Brush Size */}
+              <div>
+                <label className="block text-sm font-mono font-bold mb-2">Brush Size: {brushSize}px</label>
+                <input
+                  type="range"
+                  min="1"
+                  max="50"
+                  value={brushSize}
+                  onChange={(e) => setBrushSize(Number(e.target.value))}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs font-mono text-gray-600 mt-1">
+                  <span>1px</span>
+                  <span>50px</span>
+                </div>
+              </div>
+
+              {/* Opacity */}
+              <div>
+                <label className="block text-sm font-mono font-bold mb-2">Opacity: {Math.round(opacity * 100)}%</label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.1"
+                  value={opacity}
+                  onChange={(e) => setOpacity(Number(e.target.value))}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs font-mono text-gray-600 mt-1">
+                  <span>10%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+
+              {/* Tools */}
+              <div>
+                <label className="block text-sm font-mono font-bold mb-2">Tools</label>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setIsEraser(!isEraser)}
+                    className={`w-full px-3 py-2 border-2 font-mono text-sm ${isEraser ? 'border-red-500 bg-red-100' : 'border-black bg-white'}`}
+                  >
+                    {isEraser ? '🧹 Eraser ON' : '✏️ Brush'}
+                  </button>
+                  <select
+                    value={brushType}
+                    onChange={(e) => setBrushType(e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 font-mono text-sm"
+                  >
+                    <option value="round">Round Brush</option>
+                    <option value="square">Square Brush</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Drawing Canvas */}
           <div className="mb-8">
             <h2 className="text-lg font-mono font-bold mb-4">Draw Your Character</h2>
@@ -142,15 +251,21 @@ export default function CreatePage() {
               />
             </div>
             
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-4 flex-wrap">
               <button 
                 onClick={clearCanvas}
-                className="px-4 py-2 border-2 border-black bg-white hover:bg-gray-100 text-black font-mono"
+                className="px-4 py-2 border-2 border-red-500 bg-white hover:bg-red-50 text-red-600 font-mono"
               >
-                Clear Canvas
+                🗑️ Clear All
               </button>
-              <span className="px-4 py-2 font-mono text-sm text-gray-600">
-                Black & white only • Click and drag to draw
+              <button 
+                onClick={() => {setCurrentColor('#000000'); setBrushSize(3); setOpacity(1); setIsEraser(false); setBrushType('round');}}
+                className="px-4 py-2 border-2 border-blue-500 bg-white hover:bg-blue-50 text-blue-600 font-mono"
+              >
+                🔄 Reset Tools
+              </button>
+              <span className="px-4 py-2 font-mono text-sm text-gray-600 flex items-center">
+                Full color support • Click and drag to draw • Use tools above
               </span>
             </div>
           </div>
