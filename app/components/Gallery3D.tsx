@@ -190,7 +190,10 @@ function BlenderGallery() {
     console.log('=== Gallery Model Meshes ===');
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        console.log('Mesh name:', child.name, 'Material:', child.material);
+        const childNameLower = child.name.toLowerCase();
+        const wouldBeArtwork = (childNameLower.includes('art') || childNameLower.includes('plane') || childNameLower.includes('canvas')) && 
+                              !childNameLower.includes('frame');
+        console.log('Mesh:', child.name, '| Would be artwork:', wouldBeArtwork, '| Material:', child.material?.type);
       }
     });
     
@@ -198,11 +201,19 @@ function BlenderGallery() {
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         // Target only artwork objects, exclude all frames
-        const artworkNames = ['ArtWork', 'ArtWork001', 'ArtWork002', 'ArtWork003', 'ArtWork004', 'ArtWork005', 'Artwork', 'artwork', 'plane', 'Plane'];
-        const isArtwork = (artworkNames.some(name => child.name.toLowerCase().includes(name.toLowerCase())) || 
-                          child.name.toLowerCase().includes('art')) &&
+        const artworkNames = ['ArtWork', 'Artwork', 'artwork', 'plane', 'Plane', 'Canvas', 'canvas', 'Picture', 'picture', 'Image', 'image'];
+        const childNameLower = child.name.toLowerCase();
+        const isArtwork = (artworkNames.some(name => childNameLower.includes(name.toLowerCase())) || 
+                          childNameLower.includes('art') ||
+                          childNameLower.includes('canvas') ||
+                          childNameLower.includes('picture') ||
+                          childNameLower.includes('image') ||
+                          childNameLower.includes('plane')) &&
                          // Exclude ALL frames
-                         !child.name.toLowerCase().includes('frame');
+                         !childNameLower.includes('frame') &&
+                         !childNameLower.includes('wall') &&
+                         !childNameLower.includes('floor') &&
+                         !childNameLower.includes('ceiling');
         
         if (isArtwork && comingSoonTexture) {
           console.log('Applying texture to:', child.name);
