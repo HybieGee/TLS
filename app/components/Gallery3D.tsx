@@ -199,15 +199,23 @@ function BlenderGallery() {
       if (child instanceof THREE.Mesh) {
         // Target specific artwork objects by name - check for various naming patterns
         const artworkNames = ['ArtWork', 'ArtWork001', 'ArtWork002', 'ArtWork003', 'ArtWork004', 'ArtWork005', 'Artwork', 'artwork', 'plane', 'Plane'];
-        const isArtwork = artworkNames.some(name => child.name.toLowerCase().includes(name.toLowerCase())) || 
-                         child.name.toLowerCase().includes('art') || 
-                         child.name.toLowerCase().includes('frame');
+        const isArtwork = (artworkNames.some(name => child.name.toLowerCase().includes(name.toLowerCase())) || 
+                          child.name.toLowerCase().includes('art') || 
+                          child.name.toLowerCase().includes('frame')) &&
+                         // Exclude Frame6 and Artwork6
+                         !child.name.toLowerCase().includes('frame6') &&
+                         !child.name.toLowerCase().includes('artwork6');
         
         if (isArtwork && comingSoonTexture) {
           console.log('Applying texture to:', child.name);
-          // Clone material to avoid affecting original
+          // Clone texture for rotation
+          const rotatedTexture = comingSoonTexture.clone();
+          rotatedTexture.rotation = Math.PI / 2; // 90 degree rotation
+          rotatedTexture.center.set(0.5, 0.5);
+          rotatedTexture.needsUpdate = true;
+          
           const newMaterial = new THREE.MeshStandardMaterial({
-            map: comingSoonTexture,
+            map: rotatedTexture,
             transparent: false,
             side: THREE.FrontSide,
             color: 0xffffff
