@@ -197,18 +197,12 @@ function BlenderGallery() {
     // Add edges to each mesh and replace artwork textures
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // Target specific artwork objects by name - check for various naming patterns
+        // Target only artwork objects, exclude all frames
         const artworkNames = ['ArtWork', 'ArtWork001', 'ArtWork002', 'ArtWork003', 'ArtWork004', 'ArtWork005', 'Artwork', 'artwork', 'plane', 'Plane'];
         const isArtwork = (artworkNames.some(name => child.name.toLowerCase().includes(name.toLowerCase())) || 
-                          child.name.toLowerCase().includes('art') || 
-                          child.name.toLowerCase().includes('frame')) &&
-                         // Exclude specific frames and artworks
-                         !child.name.toLowerCase().includes('frame6') &&
-                         !child.name.toLowerCase().includes('artwork6') &&
-                         !child.name.toLowerCase().includes('frame006') &&
-                         !child.name.toLowerCase().includes('artwork006') &&
-                         !child.name.toLowerCase().includes('frame007') &&
-                         !child.name.toLowerCase().includes('frame7');
+                          child.name.toLowerCase().includes('art')) &&
+                         // Exclude ALL frames
+                         !child.name.toLowerCase().includes('frame');
         
         if (isArtwork && comingSoonTexture) {
           console.log('Applying texture to:', child.name);
