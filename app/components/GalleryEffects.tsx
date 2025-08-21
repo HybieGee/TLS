@@ -4,7 +4,6 @@ import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
-import Image from 'next/image';
 
 // Simplified audio system using Web Audio API
 function useGalleryAudio() {
@@ -275,29 +274,50 @@ export function AnimatedSpotlight() {
 // Waving pencil sprite animation
 export function WavingPencil() {
   const [currentFrame, setCurrentFrame] = useState(1);
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  // Preload all frames for smooth animation
+  useEffect(() => {
+    const preloadImages = async () => {
+      const promises = [];
+      for (let i = 1; i <= 16; i++) {
+        const img = new window.Image();
+        img.src = `/sprites/waving-pencil/${i}.png`;
+        promises.push(new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve; // Don't fail if one image fails
+        }));
+      }
+      await Promise.all(promises);
+      setIsLoaded(true);
+    };
+    
+    preloadImages();
+  }, []);
   
   useEffect(() => {
+    if (!isLoaded) return;
+    
     const interval = setInterval(() => {
       setCurrentFrame((prev) => (prev >= 16 ? 1 : prev + 1));
-    }, 100); // Change frame every 100ms for smooth animation
+    }, 120); // Slightly slower for better visibility
     
     return () => clearInterval(interval);
-  }, []);
+  }, [isLoaded]);
+  
+  if (!isLoaded) return null;
   
   return (
     <div className="fixed bottom-4 right-4 z-40 pointer-events-none">
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={`/sprites/waving-pencil/${currentFrame}.png`}
         alt="Waving Pencil"
-        width={64}
-        height={64}
-        className="object-contain"
+        className="w-16 h-16 object-contain"
         style={{
           imageRendering: 'pixelated', // Keep pixel art crisp
           filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))'
         }}
-        priority={false}
-        unoptimized={true} // Keep sprites unoptimized for pixel art
       />
     </div>
   );
