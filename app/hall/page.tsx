@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 interface Winner {
@@ -89,12 +90,21 @@ export default function HallPage() {
                     </span>
                   </div>
                   
-                  <div className="aspect-square border border-gray-300 bg-gray-50 mb-4 overflow-hidden">
-                    <img 
-                      src={winner.imageUrl} 
-                      alt={winner.name}
-                      className="w-full h-full object-contain"
-                    />
+                  <div className="aspect-square border border-gray-300 bg-gray-50 mb-4 overflow-hidden relative">
+                    {winner.imageUrl.startsWith('data:') ? (
+                      <img 
+                        src={winner.imageUrl} 
+                        alt={winner.name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Image 
+                        src={winner.imageUrl} 
+                        alt={winner.name}
+                        fill
+                        className="object-contain"
+                      />
+                    )}
                   </div>
                   
                   <h3 className="font-mono font-bold text-lg mb-2">{winner.name}</h3>

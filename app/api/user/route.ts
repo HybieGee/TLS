@@ -3,8 +3,30 @@ import { cookies } from 'next/headers';
 
 export const runtime = 'edge';
 
-export async function GET(request: NextRequest) {
-  const env = process.env as any;
+interface Env {
+  DB: D1Database;
+  KV_SESSIONS: KVNamespace;
+  SESSION_COOKIE_NAME?: string;
+}
+
+interface D1Database {
+  prepare: (query: string) => D1PreparedStatement;
+}
+
+interface D1PreparedStatement {
+  bind: (...values: any[]) => D1PreparedStatement;
+  run: () => Promise<any>;
+  first: () => Promise<any>;
+  all: () => Promise<any>;
+}
+
+interface KVNamespace {
+  put: (key: string, value: string, options?: { expirationTtl?: number }) => Promise<void>;
+  get: (key: string) => Promise<string | null>;
+}
+
+export async function GET() {
+  const env = process.env as unknown as Env;
   
   try {
     const cookieStore = await cookies();

@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/auth';
 
 interface Submission {
   id: string;
@@ -23,7 +23,6 @@ interface Period {
 }
 
 export default function VotePage() {
-  const { user } = useAuth();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [period, setPeriod] = useState<Period | null>(null);
   const [votedSubmissionId, setVotedSubmissionId] = useState<string | null>(null);
@@ -32,14 +31,36 @@ export default function VotePage() {
 
   useEffect(() => {
     fetchCurrentPeriod();
-    const interval = setInterval(updateTimeLeft, 1000);
-    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     if (period) {
       fetchSubmissions();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [period]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!period) return;
+      
+      const now = Date.now();
+      const end = new Date(period.endsAt).getTime();
+      const remaining = Math.max(0, end - now);
+      
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+      setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+      
+      if (remaining === 0) {
+        setTimeout(() => {
+          fetchCurrentPeriod();
+          setVotedSubmissionId(null);
+        }, 2000);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [period]);
 
   const fetchCurrentPeriod = async () => {
@@ -66,24 +87,6 @@ export default function VotePage() {
     }
   };
 
-  const updateTimeLeft = () => {
-    if (!period) return;
-    
-    const now = Date.now();
-    const end = new Date(period.endsAt).getTime();
-    const remaining = Math.max(0, end - now);
-    
-    const minutes = Math.floor(remaining / 60000);
-    const seconds = Math.floor((remaining % 60000) / 1000);
-    setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-    
-    if (remaining === 0) {
-      setTimeout(() => {
-        fetchCurrentPeriod();
-        setVotedSubmissionId(null);
-      }, 2000);
-    }
-  };
 
   const handleVote = async (submissionId: string) => {
     if (!period || votedSubmissionId) return;
@@ -148,12 +151,21 @@ export default function VotePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {submissions.map(submission => (
               <div key={submission.id} className="border-2 border-black bg-white p-4">
-                <div className="aspect-square border border-gray-300 bg-gray-50 mb-4 overflow-hidden">
-                  <img 
-                    src={submission.imageUrl} 
-                    alt={submission.name}
-                    className="w-full h-full object-contain"
-                  />
+                <div className="aspect-square border border-gray-300 bg-gray-50 mb-4 overflow-hidden relative">
+                  {submission.imageUrl.startsWith('data:') ? (
+                    <img 
+                      src={submission.imageUrl} 
+                      alt={submission.name}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <Image 
+                      src={submission.imageUrl} 
+                      alt={submission.name}
+                      fill
+                      className="object-contain"
+                    />
+                  )}
                 </div>
                 <h3 className="font-mono font-bold text-lg mb-2">{submission.name}</h3>
                 <p className="font-mono text-sm text-gray-600 mb-2">

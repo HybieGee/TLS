@@ -3,8 +3,35 @@ import { cookies } from 'next/headers';
 
 export const runtime = 'edge';
 
+interface Env {
+  DB: D1Database;
+  KV_SESSIONS: KVNamespace;
+  SESSION_COOKIE_NAME?: string;
+  R2_BUCKET?: R2Bucket;
+}
+
+interface D1Database {
+  prepare: (query: string) => D1PreparedStatement;
+}
+
+interface D1PreparedStatement {
+  bind: (...values: any[]) => D1PreparedStatement;
+  run: () => Promise<any>;
+  first: () => Promise<any>;
+  all: () => Promise<any>;
+}
+
+interface KVNamespace {
+  put: (key: string, value: string, options?: { expirationTtl?: number }) => Promise<void>;
+  get: (key: string) => Promise<string | null>;
+}
+
+interface R2Bucket {
+  put: (key: string, value: ArrayBuffer | ArrayBufferView | string | ReadableStream, options?: any) => Promise<void>;
+}
+
 export async function GET(request: NextRequest) {
-  const env = process.env as any;
+  const env = process.env as unknown as Env;
   
   try {
     const url = new URL(request.url);
@@ -37,7 +64,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const env = process.env as any;
+  const env = process.env as unknown as Env;
   
   try {
     const cookieStore = await cookies();
@@ -110,7 +137,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function uploadToStorage(imageData: string, submissionId: string, env: any): Promise<string> {
+async function uploadToStorage(imageData: string, submissionId: string, env: Env): Promise<string> {
   const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
   const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
   

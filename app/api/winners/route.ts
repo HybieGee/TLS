@@ -2,8 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
+interface Env {
+  DB: D1Database;
+}
+
+interface D1Database {
+  prepare: (query: string) => D1PreparedStatement;
+}
+
+interface D1PreparedStatement {
+  bind: (...values: any[]) => D1PreparedStatement;
+  run: () => Promise<any>;
+  first: () => Promise<any>;
+  all: () => Promise<any>;
+}
+
 export async function GET(request: NextRequest) {
-  const env = process.env as any;
+  const env = process.env as unknown as Env;
   
   try {
     const url = new URL(request.url);

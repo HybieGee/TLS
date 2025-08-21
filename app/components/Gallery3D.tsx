@@ -7,7 +7,7 @@ import * as THREE from 'three';
 
 // FPS Movement Controls with Collision Detection
 function MovementControls() {
-  const { camera, gl, scene } = useThree();
+  const { camera, gl } = useThree();
   const moveSpeed = 0.1;
   const lookSpeed = 0.002;
   const playerRadius = 0.5; // Collision radius
