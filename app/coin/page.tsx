@@ -141,7 +141,7 @@ export default function CoinPage() {
               <li>• Organic, genuine growth driven by community value</li>
             </ul>
             <p className="mt-4 text-sm text-gray-600">
-              We believe in putting our own money where our mouth is. If we're asking you 
+              We believe in putting our own money where our mouth is. If we&apos;re asking you 
               to believe in this project, we should be the first ones to invest in its success.
             </p>
           </div>
