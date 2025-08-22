@@ -234,8 +234,8 @@ export function WelcomeOverlay() {
       }
     };
 
-    // Listen for movement keys only (not mouse movement)
-    const events = ['keydown'];
+    // Listen for click only to dismiss instructions
+    const events = ['click'];
     
     events.forEach(event => {
       document.addEventListener(event, handleInteraction);
@@ -270,12 +270,13 @@ export function WelcomeOverlay() {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold mb-2">Experience:</h3>
+            <h3 className="font-bold mb-2">What You Can Do:</h3>
             <ul className="space-y-1">
-              <li>→ Approach artworks for glow</li>
-              <li>→ Listen for footsteps</li>
-              <li>→ Enjoy floating particles</li>
-              <li>→ Vote every hour!</li>
+              <li>→ Create drawings (3/hour)</li>
+              <li>→ Vote for favorites (3/hour)</li>
+              <li>→ Best artwork enters gallery</li>
+              <li>→ New voting every hour!</li>
+              <li>→ Click anywhere to start</li>
             </ul>
           </div>
         </div>
