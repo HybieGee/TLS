@@ -1,13 +1,14 @@
 'use client';
 
 import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
-import { useGLTF, Float } from '@react-three/drei';
-import React, { Suspense, useRef, useEffect } from 'react';
+import { useGLTF, Float, Html } from '@react-three/drei';
+import React, { Suspense, useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { FloatingParticles, AnimatedSpotlight, WelcomeOverlay, AudioTrigger, WavingPencil3D } from './GalleryEffects';
 import { useMultiplayer } from '../hooks/useMultiplayer';
 import { EnhancedPlayerAvatar } from './CustomModelLoader';
 import { CharacterSelector, useCharacterSelector } from './CharacterSelector';
+import { useRouter } from 'next/navigation';
 
 // FPS Movement Controls with Collision Detection
 function MovementControls({ sendPosition }: { sendPosition?: (position: [number, number, number], rotation: [number, number, number]) => void }) {
@@ -209,6 +210,64 @@ function MovementControls({ sendPosition }: { sendPosition?: (position: [number,
   return null;
 }
 
+// Interactive Artwork006 Component
+function InteractiveArtwork006() {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [isNear, setIsNear] = useState(false);
+  const { camera } = useThree();
+  const router = useRouter();
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  // Approximate position of Artwork006 in the gallery
+  const artwork006Position = new THREE.Vector3(0, 2, -8);
+  
+  useFrame(() => {
+    const distance = camera.position.distanceTo(artwork006Position);
+    const nearThreshold = 3;
+    const newIsNear = distance < nearThreshold;
+    
+    if (newIsNear !== isNear) {
+      setIsNear(newIsNear);
+      if (newIsNear) {
+        setShowTooltip(true);
+      } else {
+        setShowTooltip(false);
+      }
+    }
+  });
+
+  const handleClick = () => {
+    router.push('/coin');
+  };
+
+  return (
+    <mesh 
+      ref={meshRef}
+      position={[0, 2, -8]} 
+      onClick={handleClick}
+      onPointerOver={() => setShowTooltip(true)}
+      onPointerOut={() => !isNear && setShowTooltip(false)}
+    >
+      <boxGeometry args={[2, 1.5, 0.1]} />
+      <meshBasicMaterial transparent opacity={0} />
+      
+      {showTooltip && (
+        <Html
+          position={[0, 1, 0]}
+          center
+          distanceFactor={10}
+        >
+          <div className="bg-black text-white px-4 py-2 rounded font-mono text-sm pointer-events-none">
+            🪙 Learn about The Living Sketchbook Coin
+            <br />
+            <span className="text-xs text-gray-300">Click to view details</span>
+          </div>
+        </Html>
+      )}
+    </mesh>
+  );
+}
+
 // Blender Gallery Component with Sketchbook Outlines and Coming Soon Textures
 function BlenderGallery() {
   const { scene } = useGLTF('/models/Gallery.glb');
@@ -378,7 +437,8 @@ function GalleryScene() {
         <BlenderGallery />
       </Float>
       
-      
+      {/* Interactive Artwork006 for coin info */}
+      <InteractiveArtwork006 />
       
       {/* Animated 3D pencil character */}
       <WavingPencil3D />
