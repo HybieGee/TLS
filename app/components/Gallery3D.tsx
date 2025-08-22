@@ -218,8 +218,8 @@ function InteractiveArtwork006() {
   const router = useRouter();
   const meshRef = useRef<THREE.Mesh>(null);
   
-  // Position for Artwork006 - adjust to match actual location in gallery
-  const artwork006Position = new THREE.Vector3(8, 2, 0);
+  // Position for Artwork006 - right side of gallery
+  const artwork006Position = new THREE.Vector3(10, 2, 2);
   
   useFrame(() => {
     const distance = camera.position.distanceTo(artwork006Position);
@@ -243,7 +243,7 @@ function InteractiveArtwork006() {
   return (
     <mesh 
       ref={meshRef}
-      position={[8, 2, 0]} 
+      position={[10, 2, 2]} 
       onClick={handleClick}
       onPointerOver={() => setShowTooltip(true)}
       onPointerOut={() => !isNear && setShowTooltip(false)}

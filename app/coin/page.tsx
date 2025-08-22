@@ -1,13 +1,25 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function CoinPage() {
   const [copiedCA, setCopiedCA] = useState(false);
-  // Placeholder for CA - replace with actual contract address when launched
-  const contractAddress = 'TBA - Coming Soon';
-  const isLaunched = false; // Set to true when coin is launched
+  const [contractAddress, setContractAddress] = useState('TBA - Coming Soon');
+  const [isLaunched, setIsLaunched] = useState(false);
+
+  useEffect(() => {
+    // Load config from coin-config.json
+    fetch('/coin-config.json')
+      .then(res => res.json())
+      .then(config => {
+        setContractAddress(config.contractAddress);
+        setIsLaunched(config.isLaunched);
+      })
+      .catch(err => {
+        console.log('Config not found, using defaults');
+      });
+  }, []);
 
   const copyToClipboard = () => {
     if (isLaunched && contractAddress !== 'TBA - Coming Soon') {
