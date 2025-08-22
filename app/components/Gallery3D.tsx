@@ -277,11 +277,30 @@ function InteractiveArtwork006() {
 // Blender Gallery Component with Sketchbook Outlines and Coming Soon Textures
 function BlenderGallery() {
   const { scene } = useGLTF('/models/Gallery.glb');
+  const [galleryState, setGalleryState] = useState<any>(null);
   
   // Load Coming Soon texture - your awesome sketch!
   const comingSoonTexture = useLoader(THREE.TextureLoader, '/images/coming-soon.png');
+
+  // Fetch gallery state (which artworks are deployed)
+  useEffect(() => {
+    const fetchGalleryState = async () => {
+      try {
+        const response = await fetch('/api/gallery/current');
+        if (response.ok) {
+          const data = await response.json();
+          setGalleryState(data.gallery);
+          console.log('🖼️ Gallery state loaded:', data.gallery);
+        }
+      } catch (error) {
+        console.error('Failed to fetch gallery state:', error);
+      }
+    };
+
+    fetchGalleryState();
+  }, []);
   
-  // Clone scene to add edges and replace artwork textures
+  // Clone scene to add edges and replace artwork textures  
   const sceneWithEdges = React.useMemo(() => {
     const cloned = scene.clone();
     
@@ -315,8 +334,13 @@ function BlenderGallery() {
     // Add edges to each mesh and replace artwork textures
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        // Target only specific artwork objects for Coming Soon texture
+        // Target only specific artwork objects for textures
         const childNameLower = child.name.toLowerCase();
+        
+        // Check if this position has a winner artwork
+        const galleryPosition = galleryState?.find((pos: any) => 
+          pos.position.toLowerCase() === child.name.toLowerCase()
+        );
         
         // Only apply Coming Soon to these specific artworks (exact names from console)
         const isComingSoonArtwork = childNameLower === 'leftartwork' ||
@@ -326,13 +350,31 @@ function BlenderGallery() {
                                    childNameLower === 'rightartwork004' ||
                                    childNameLower === 'rightartwork005';
         
-        if (isComingSoonArtwork && comingSoonTexture) {
-          console.log('✅ Applying Coming Soon texture to:', child.name);
-          // Clone texture for rotation
-          const rotatedTexture = comingSoonTexture.clone();
-          
-          // Apply rotation
-          rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation for ALL
+        if (isComingSoonArtwork) {
+          if (galleryPosition?.artwork?.imageUrl) {
+            // Apply winner artwork texture
+            console.log('🏆 Applying winner texture to:', child.name, galleryPosition.artwork.name);
+            
+            const winnerTexture = new THREE.TextureLoader().load(galleryPosition.artwork.imageUrl);
+            winnerTexture.flipY = false;
+            winnerTexture.wrapS = THREE.ClampToEdgeWrapping;
+            winnerTexture.wrapT = THREE.ClampToEdgeWrapping;
+            winnerTexture.needsUpdate = true;
+            
+            const newMaterial = new THREE.MeshBasicMaterial({
+              map: winnerTexture,
+              transparent: false,
+              side: THREE.DoubleSide,
+              color: 0xffffff
+            });
+            child.material = newMaterial;
+          } else if (comingSoonTexture) {
+            // Apply Coming Soon texture as fallback
+            console.log('✅ Applying Coming Soon texture to:', child.name);
+            const rotatedTexture = comingSoonTexture.clone();
+            
+            // Apply rotation
+            rotatedTexture.rotation = -Math.PI / 2; // -90 degree rotation for ALL
           
           // Flip horizontally for right side artworks that appear backwards
           if (childNameLower === 'rightartwork003' || 
@@ -354,6 +396,7 @@ function BlenderGallery() {
             color: 0xffffff // Full brightness, unaffected by lighting
           });
           child.material = newMaterial;
+          }
         }
         
         // Apply color fix to other artwork meshes to prevent fading
@@ -402,7 +445,7 @@ function BlenderGallery() {
     });
     
     return cloned;
-  }, [scene, comingSoonTexture]);
+  }, [scene, comingSoonTexture, galleryState]);
   
   return <primitive object={sceneWithEdges} />;
 }

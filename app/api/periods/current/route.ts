@@ -24,26 +24,28 @@ interface D1ResultSet {
   meta: Record<string, unknown>;
 }
 
-export async function GET() {
-  // For development, return mock period
-  if (process.env.NODE_ENV === 'development') {
-    const now = new Date();
-    const startOfHour = new Date(now);
-    startOfHour.setMinutes(0, 0, 0);
-    const endOfHour = new Date(startOfHour.getTime() + 60 * 60 * 1000);
-    const timeRemaining = Math.max(0, endOfHour.getTime() - now.getTime());
+async function resolvePeriodIfNeeded(DB: D1Database, periodKey: string): Promise<void> {
+  try {
+    console.log('🔍 Checking if period needs resolution:', periodKey);
     
-    return NextResponse.json({
-      period: {
-        key: `mock-${startOfHour.getHours()}`,
-        startsAt: startOfHour.toISOString(),
-        endsAt: endOfHour.toISOString(),
-        timeRemaining: Math.floor(timeRemaining / 1000),
-        isResolved: false,
-        winnerId: null
-      }
+    // Call the resolve endpoint internally
+    const response = await fetch('https://d1aa295f.tls-9vb.pages.dev/api/periods/resolve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ periodKey })
     });
+    
+    if (response.ok) {
+      console.log('✅ Period resolved automatically:', periodKey);
+    } else {
+      console.log('⚠️ Period resolution failed:', await response.text());
+    }
+  } catch (error) {
+    console.error('❌ Auto-resolution error:', error);
   }
+}
+
+export async function GET() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const DB = (process.env as any).DB as D1Database | undefined;
@@ -70,6 +72,18 @@ export async function GET() {
     ).bind(periodKey).first();
     
     if (!period) {
+      // Check if there are any unresolved previous periods and resolve them
+      const unresolved = await DB.prepare(
+        'SELECT key, endsAt FROM Period WHERE resolvedAt IS NULL AND endsAt < ? ORDER BY endsAt DESC LIMIT 5'
+      ).bind(now.toISOString()).all();
+
+      // Resolve previous periods
+      for (const unresolvedPeriod of unresolved.results) {
+        const period = unresolvedPeriod as any;
+        console.log('🕐 Auto-resolving expired period:', period.key);
+        await resolvePeriodIfNeeded(DB, period.key);
+      }
+
       await DB.prepare(
         'INSERT INTO Period (key, startsAt, endsAt) VALUES (?, ?, ?)'
       ).bind(periodKey, startOfHour.toISOString(), endOfHour.toISOString()).run();
@@ -81,6 +95,16 @@ export async function GET() {
         resolvedAt: null,
         winnerSubmissionId: null
       };
+    } else {
+      // Check if current period has ended and needs resolution
+      const periodData = period as any;
+      if (!periodData.resolvedAt && new Date(periodData.endsAt) <= now) {
+        console.log('⏰ Current period has ended, resolving:', periodKey);
+        await resolvePeriodIfNeeded(DB, periodKey);
+        // Refresh period data after resolution
+        const refreshed = await DB.prepare('SELECT * FROM Period WHERE key = ?').bind(periodKey).first();
+        if (refreshed) period = refreshed;
+      }
     }
 
     const timeRemaining = Math.max(0, endOfHour.getTime() - now.getTime());

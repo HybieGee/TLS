@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
        WHERE s.status = 'approved'
        AND s.createdAt >= ? AND s.createdAt < ?
        GROUP BY s.id, s.name, s.description, s.imageUrl
-       ORDER BY s.createdAt DESC`
+       ORDER BY COUNT(v.id) DESC, s.createdAt DESC`
     ).bind(periodKey, hourStart.toISOString(), hourEnd.toISOString()).all();
 
     console.log('Vote counts result:', {
