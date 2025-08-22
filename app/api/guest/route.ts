@@ -33,10 +33,24 @@ interface KVNamespace {
 export async function POST(request: NextRequest) {
   // For development, return a mock response
   if (process.env.NODE_ENV === 'development') {
+    // Check if there's already a valid session
+    const cookieStore = await cookies();
+    const existingSessionId = cookieStore.get('sb_session')?.value;
+    
+    if (existingSessionId) {
+      // Return existing session info (mock)
+      return NextResponse.json({
+        success: true,
+        userId: 'dev-user-' + existingSessionId,
+        sessionId: existingSessionId,
+        kind: 'guest'
+      });
+    }
+    
+    // Create new session only if none exists
     const userId = crypto.randomUUID();
     const sessionId = crypto.randomUUID();
     
-    const cookieStore = await cookies();
     cookieStore.set('sb_session', sessionId, {
       httpOnly: true,
       secure: false,
@@ -72,6 +86,27 @@ export async function POST(request: NextRequest) {
   }
   
   try {
+    // Check if there's already a valid session
+    const cookieStore = await cookies();
+    const existingSessionId = cookieStore.get('sb_session')?.value;
+    
+    if (existingSessionId) {
+      // Check if session exists in KV store
+      const sessionData = await KV_SESSIONS.get(existingSessionId);
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        console.log('🔄 Returning existing session:', existingSessionId, 'for user:', session.userId);
+        return NextResponse.json({
+          success: true,
+          userId: session.userId,
+          sessionId: existingSessionId,
+          kind: 'guest'
+        });
+      }
+    }
+    
+    // Create new session only if none exists
+    console.log('🆕 Creating new session');
     const userId = crypto.randomUUID();
     const sessionId = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -96,7 +131,6 @@ export async function POST(request: NextRequest) {
       ipHash
     }), { expirationTtl: 86400 * 30 });
 
-    const cookieStore = await cookies();
     cookieStore.set('sb_session', sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -105,6 +139,7 @@ export async function POST(request: NextRequest) {
       path: '/'
     });
 
+    console.log('✅ Created new session:', sessionId, 'for user:', userId);
     return NextResponse.json({
       success: true,
       userId,
