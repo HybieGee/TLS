@@ -218,8 +218,8 @@ function InteractiveArtwork006() {
   const router = useRouter();
   const meshRef = useRef<THREE.Mesh>(null);
   
-  // Approximate position of Artwork006 in the gallery
-  const artwork006Position = new THREE.Vector3(0, 2, -8);
+  // Position for Artwork006 - adjust to match actual location in gallery
+  const artwork006Position = new THREE.Vector3(8, 2, 0);
   
   useFrame(() => {
     const distance = camera.position.distanceTo(artwork006Position);
@@ -243,7 +243,7 @@ function InteractiveArtwork006() {
   return (
     <mesh 
       ref={meshRef}
-      position={[0, 2, -8]} 
+      position={[8, 2, 0]} 
       onClick={handleClick}
       onPointerOver={() => setShowTooltip(true)}
       onPointerOut={() => !isNear && setShowTooltip(false)}
@@ -257,10 +257,10 @@ function InteractiveArtwork006() {
           center
           distanceFactor={10}
         >
-          <div className="bg-black text-white px-4 py-2 rounded font-mono text-sm pointer-events-none">
-            🪙 Learn about The Living Sketchbook Coin
+          <div className="bg-white border-2 border-black px-4 py-2 font-mono text-sm pointer-events-none shadow-lg">
+            🪙 About Me
             <br />
-            <span className="text-xs text-gray-300">Click to view details</span>
+            <span className="text-xs text-gray-600">Click to view details</span>
           </div>
         </Html>
       )}
