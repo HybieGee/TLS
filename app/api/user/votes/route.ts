@@ -10,6 +10,13 @@ interface D1Database {
 interface D1PreparedStatement {
   bind: (...values: unknown[]) => D1PreparedStatement;
   first: () => Promise<Record<string, unknown> | null>;
+  all: () => Promise<D1ResultSet>;
+}
+
+interface D1ResultSet {
+  results: Record<string, unknown>[];
+  success: boolean;
+  meta: Record<string, unknown>;
 }
 
 interface KVNamespace {
