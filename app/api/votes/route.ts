@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
       'SELECT COUNT(*) as count FROM Vote WHERE userId = ? AND createdAt >= ? AND createdAt < ?'
     ).bind(session.userId, hourStart.toISOString(), hourEnd.toISOString()).first();
 
-    if (existingVotes && existingVotes.count >= 3) {
+    if (existingVotes && Number(existingVotes.count) >= 3) {
       return NextResponse.json(
         { error: 'You have reached the maximum of 3 votes per hour' },
         { status: 400 }

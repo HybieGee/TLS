@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       'SELECT COUNT(*) as count FROM Submission WHERE userId = ? AND createdAt >= ? AND createdAt < ?'
     ).bind(session.userId, hourStart.toISOString(), hourEnd.toISOString()).first();
 
-    if (existingSubmissions && existingSubmissions.count >= 3) {
+    if (existingSubmissions && Number(existingSubmissions.count) >= 3) {
       return NextResponse.json(
         { error: 'You have reached the maximum of 3 submissions per hour' },
         { status: 400 }

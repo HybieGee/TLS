@@ -11,8 +11,7 @@ export default function CreatePage() {
   const [description, setDescription] = useState('');
   const { showNotification, NotificationComponent } = useNotification();
   
-  // Drawing tool state
-  const [currentColor, setCurrentColor] = useState('#000000');
+  // Drawing tool state - currentColor fixed to black only
   const [brushSize, setBrushSize] = useState(3);
   const [opacity, setOpacity] = useState(1);
   const [isEraser, setIsEraser] = useState(false);
@@ -28,14 +27,14 @@ export default function CreatePage() {
       ctx.lineWidth = brushSize * 2; // Eraser is bigger
     } else {
       ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = currentColor;
+      ctx.strokeStyle = '#000000'; // Always black
       ctx.lineWidth = brushSize;
       ctx.globalAlpha = opacity;
     }
     
     ctx.lineCap = brushType === 'square' ? 'square' : 'round';
     ctx.lineJoin = 'round';
-  }, [isEraser, brushSize, currentColor, opacity, brushType]);
+  }, [isEraser, brushSize, opacity, brushType]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
