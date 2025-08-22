@@ -182,9 +182,6 @@ export default function CoinPage() {
           </p>
           <div className="flex justify-center gap-4">
             <button className="px-6 py-3 border-2 border-black bg-white hover:bg-black hover:text-white font-mono transition-colors">
-              📱 Join Telegram
-            </button>
-            <button className="px-6 py-3 border-2 border-black bg-white hover:bg-black hover:text-white font-mono transition-colors">
               🐦 Follow Twitter
             </button>
           </div>
