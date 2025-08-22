@@ -42,7 +42,22 @@ interface R2Bucket {
 }
 
 export async function GET(request: NextRequest) {
-  const env = process.env as unknown as Env;
+  // For development, return mock data
+  if (process.env.NODE_ENV === 'development') {
+    return NextResponse.json({
+      submissions: [],
+      total: 0
+    });
+  }
+
+  const env = (request as NextRequest & { env?: Env }).env;
+  
+  if (!env?.DB) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
+  }
   
   try {
     const url = new URL(request.url);

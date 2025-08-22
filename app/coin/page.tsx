@@ -60,11 +60,11 @@ export default function CoinPage() {
           <h2 className="text-2xl font-bold font-mono mb-4">About the Coin</h2>
           <div className="space-y-4 font-mono text-gray-800">
             <p>
-              The Living Sketchbook Coin is more than just a token - it's a commitment to fostering 
+              The Living Sketchbook Coin is more than just a token - it&apos;s a commitment to fostering 
               creativity and supporting genuine community-driven projects in the crypto space.
             </p>
             <p>
-              By holding this coin, you're not just investing in a project, you're becoming part of 
+              By holding this coin, you&apos;re not just investing in a project, you&apos;re becoming part of 
               a movement that values art, creativity, and authentic community building over quick profits.
             </p>
           </div>
@@ -79,14 +79,14 @@ export default function CoinPage() {
               <p>
                 We believe in using our platform and resources to help launch other real, 
                 community-based projects. Too many projects in the crypto space are driven 
-                by hype and speculation. We're different.
+                by hype and speculation. We&apos;re different.
               </p>
             </div>
             <div className="border-l-4 border-black pl-4">
               <h3 className="font-bold mb-2">🎨 Creative Focus</h3>
               <p>
                 Projects that encourage creativity, art, and genuine community engagement 
-                will receive priority support. We're building a network of creators, not 
+                will receive priority support. We&apos;re building a network of creators, not 
                 just traders.
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function CoinPage() {
               <p className="font-bold mb-2">💰 No Hidden Costs</p>
               <p>
                 All advertising and marketing for this coin is paid out of pocket by the 
-                founding team. We're not using investor funds or community money for promotion.
+                founding team. We&apos;re not using investor funds or community money for promotion.
               </p>
             </div>
             <p>
@@ -136,7 +136,7 @@ export default function CoinPage() {
             </p>
             <ul className="space-y-2 ml-6">
               <li>• Your investment goes toward development, not ads</li>
-              <li>• We're personally invested in the project's success</li>
+              <li>• We&apos;re personally invested in the project&apos;s success</li>
               <li>• No artificial hype or paid influencer pumps</li>
               <li>• Organic, genuine growth driven by community value</li>
             </ul>
