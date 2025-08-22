@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { resolvePeriodDirectly } from '../../../lib/gallery-resolver';
 
 export const runtime = 'edge';
 
@@ -28,17 +29,13 @@ async function resolvePeriodIfNeeded(DB: D1Database, periodKey: string): Promise
   try {
     console.log('🔍 Checking if period needs resolution:', periodKey);
     
-    // Call the resolve endpoint internally
-    const response = await fetch('https://d1aa295f.tls-9vb.pages.dev/api/periods/resolve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ periodKey })
-    });
+    // Call the resolution function directly
+    const result = await resolvePeriodDirectly(DB, periodKey);
     
-    if (response.ok) {
-      console.log('✅ Period resolved automatically:', periodKey);
+    if (result.success) {
+      console.log('✅ Period resolved automatically:', periodKey, result.result);
     } else {
-      console.log('⚠️ Period resolution failed:', await response.text());
+      console.log('⚠️ Period resolution failed:', result.error);
     }
   } catch (error) {
     console.error('❌ Auto-resolution error:', error);

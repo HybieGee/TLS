@@ -90,6 +90,19 @@ export default function VotePage() {
     }
   }, [period, fetchSubmissions, fetchUserVotes]);
 
+  // Add live updates - poll for new submissions every 30 seconds
+  useEffect(() => {
+    if (!period) return;
+    
+    const interval = setInterval(() => {
+      console.log('🔄 Polling for new submissions and vote updates');
+      fetchSubmissions();
+      fetchUserVotes();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [period, fetchSubmissions, fetchUserVotes]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (!period) return;
