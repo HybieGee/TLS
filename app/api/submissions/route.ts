@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const DB = (process.env as any).DB as D1Database | undefined;
   
   if (!DB) {
@@ -100,7 +101,9 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const DB = (process.env as any).DB as D1Database | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const KV_SESSIONS = (process.env as any).KV_SESSIONS as KVNamespace | undefined;
   
   if (!DB || !KV_SESSIONS) {

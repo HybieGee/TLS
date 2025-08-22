@@ -16,7 +16,7 @@ export default function CoinPage() {
         setContractAddress(config.contractAddress);
         setIsLaunched(config.isLaunched);
       })
-      .catch(err => {
+      .catch(() => {
         console.log('Config not found, using defaults');
       });
   }, []);

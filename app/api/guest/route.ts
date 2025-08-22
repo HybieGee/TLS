@@ -3,12 +3,6 @@ import { cookies } from 'next/headers';
 
 export const runtime = 'edge';
 
-interface Env {
-  DB: D1Database;
-  KV_SESSIONS: KVNamespace;
-  SESSION_COOKIE_NAME?: string;
-}
-
 interface D1Database {
   prepare: (query: string) => D1PreparedStatement;
 }
@@ -60,7 +54,9 @@ export async function POST(request: NextRequest) {
   }
 
   // For production, access Cloudflare bindings through process.env
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const DB = (process.env as any).DB as D1Database | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const KV_SESSIONS = (process.env as any).KV_SESSIONS as KVNamespace | undefined;
   
   if (!DB || !KV_SESSIONS) {

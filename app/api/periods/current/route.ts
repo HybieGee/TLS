@@ -2,10 +2,6 @@ import { NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-interface Env {
-  DB: D1Database;
-}
-
 interface D1Database {
   prepare: (query: string) => D1PreparedStatement;
 }
@@ -28,7 +24,7 @@ interface D1ResultSet {
   meta: Record<string, unknown>;
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   // For development, return mock period
   if (process.env.NODE_ENV === 'development') {
     const now = new Date();
@@ -49,6 +45,7 @@ export async function GET(request: Request) {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const DB = (process.env as any).DB as D1Database | undefined;
   
   if (!DB) {
