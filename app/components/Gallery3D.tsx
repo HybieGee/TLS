@@ -356,6 +356,25 @@ function BlenderGallery() {
           child.material = newMaterial;
         }
         
+        // Apply color fix to other artwork meshes to prevent fading
+        const isOtherArtwork = childNameLower === 'trump_artwork' ||
+                              childNameLower === 'elon_artwork' ||
+                              childNameLower === 'bonk_artwork' ||
+                              childNameLower === 'pump_artwork' ||
+                              childNameLower === 'artwork006';
+                              
+        if (isOtherArtwork) {
+          console.log('🎨 Applying color fix to:', child.name);
+          // Fix faded colors by ensuring full brightness
+          if (child.material instanceof THREE.MeshStandardMaterial) {
+            child.material.color.setHex(0xffffff); // Full white for brightness
+            child.material.needsUpdate = true;
+          } else if (child.material instanceof THREE.MeshBasicMaterial) {
+            child.material.color.setHex(0xffffff);
+            child.material.needsUpdate = true;
+          }
+        }
+        
         // Create edges geometry with threshold for clean lines
         const edges = new THREE.EdgesGeometry(child.geometry, 30);
         
