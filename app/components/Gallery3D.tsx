@@ -236,17 +236,24 @@ function InteractiveArtwork006() {
     }
   });
 
-  const handleClick = () => {
-    router.push('/coin');
-  };
+  // Listen for E key press when near
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'e' || e.key === 'E') {
+        if (isNear) {
+          router.push('/coin');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isNear, router]);
 
   return (
     <mesh 
       ref={meshRef}
       position={[10, 2, 2]} 
-      onClick={handleClick}
-      onPointerOver={() => setShowTooltip(true)}
-      onPointerOut={() => !isNear && setShowTooltip(false)}
     >
       <boxGeometry args={[2, 1.5, 0.1]} />
       <meshBasicMaterial transparent opacity={0} />
@@ -260,7 +267,7 @@ function InteractiveArtwork006() {
           <div className="bg-white border-2 border-black px-4 py-2 font-mono text-sm pointer-events-none shadow-lg">
             🪙 About Me
             <br />
-            <span className="text-xs text-gray-600">Click to view details</span>
+            <span className="text-xs text-gray-600">Press E to interact</span>
           </div>
         </Html>
       )}
