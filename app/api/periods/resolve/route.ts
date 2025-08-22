@@ -94,9 +94,9 @@ export async function POST(request: NextRequest) {
     console.log('🖼️ Deploying to position:', nextPosition);
 
     // Check if there's currently an artwork at this position
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const currentArtwork = await DB.prepare(
       'SELECT submissionId, periodKey FROM GalleryPosition WHERE position = ?'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ).bind(nextPosition).first() as any;
 
     // Archive the current artwork if it exists
@@ -104,9 +104,9 @@ export async function POST(request: NextRequest) {
       console.log('📦 Archiving current artwork at position:', nextPosition);
       
       // Get the vote count for the artwork being archived
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const currentVoteCount = await DB.prepare(
         'SELECT COUNT(*) as count FROM Vote WHERE submissionId = ? AND periodKey = ?'
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ).bind(currentArtwork.submissionId, currentArtwork.periodKey).first() as any;
 
       // Archive it
