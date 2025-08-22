@@ -223,7 +223,7 @@ function InteractiveArtwork006() {
   
   useFrame(() => {
     const distance = camera.position.distanceTo(artwork006Position);
-    const nearThreshold = 3;
+    const nearThreshold = 5; // Increased from 3 to 5 for further range
     const newIsNear = distance < nearThreshold;
     
     if (newIsNear !== isNear) {
@@ -260,7 +260,7 @@ function InteractiveArtwork006() {
       
       {showTooltip && (
         <Html
-          position={[0, 1, 0]}
+          position={[0, -0.8, 0.1]}
           center
           distanceFactor={10}
         >

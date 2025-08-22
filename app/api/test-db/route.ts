@@ -68,7 +68,9 @@ export async function GET() {
     return NextResponse.json({
       success: false,
       error: String(error),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hasDB: !!(process.env as any).DB,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hasKV: !!(process.env as any).KV_SESSIONS
     }, { status: 500 });
   }
