@@ -73,17 +73,19 @@ export async function GET(request: NextRequest) {
       now: now.toISOString()
     });
 
-    // Simplified query without JOINs to isolate the issue
+    // Get submissions with proper vote counts
     const voteCounts = await DB.prepare(
       `SELECT 
         s.id, s.name, s.description, s.imageUrl,
-        0 as voteCount,
+        COUNT(v.id) as voteCount,
         'Guest' as userAlias
        FROM Submission s
+       LEFT JOIN Vote v ON s.id = v.submissionId AND v.periodKey = ?
        WHERE s.status = 'approved'
        AND s.createdAt >= ? AND s.createdAt < ?
+       GROUP BY s.id, s.name, s.description, s.imageUrl
        ORDER BY s.createdAt DESC`
-    ).bind(hourStart.toISOString(), hourEnd.toISOString()).all();
+    ).bind(periodKey, hourStart.toISOString(), hourEnd.toISOString()).all();
 
     console.log('Vote counts result:', {
       success: voteCounts.success,
