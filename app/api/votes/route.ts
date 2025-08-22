@@ -66,6 +66,13 @@ export async function GET(request: NextRequest) {
     hourStart.setMinutes(0, 0, 0);
     const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
 
+    console.log('Votes API Debug:', {
+      periodKey,
+      hourStart: hourStart.toISOString(),
+      hourEnd: hourEnd.toISOString(),
+      now: now.toISOString()
+    });
+
     const voteCounts = await DB.prepare(
       `SELECT 
         s.id, s.name, s.description, s.imageUrl,
@@ -79,6 +86,12 @@ export async function GET(request: NextRequest) {
        GROUP BY s.id
        ORDER BY voteCount DESC`
     ).bind(periodKey, hourStart.toISOString(), hourEnd.toISOString()).all();
+
+    console.log('Vote counts result:', {
+      success: voteCounts.success,
+      resultCount: voteCounts.results?.length || 0,
+      results: voteCounts.results
+    });
 
     return NextResponse.json({
       period: periodKey,
@@ -120,6 +133,8 @@ export async function POST(request: NextRequest) {
     const cookieStore = await cookies();
     const sessionId = cookieStore.get('sb_session')?.value;
     
+    console.log('POST votes debug - sessionId:', sessionId);
+    
     if (!sessionId) {
       return NextResponse.json(
         { error: 'Not authenticated' },
@@ -128,6 +143,7 @@ export async function POST(request: NextRequest) {
     }
 
     const sessionData = await KV_SESSIONS.get(sessionId);
+    console.log('POST votes debug - sessionData:', !!sessionData);
     if (!sessionData) {
       return NextResponse.json(
         { error: 'Invalid session' },
