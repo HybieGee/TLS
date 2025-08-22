@@ -147,25 +147,17 @@ export default function CoinPage() {
           </div>
         </div>
 
-        {/* Tokenomics Placeholder */}
+        {/* Tokenomics */}
         <div className="border-2 border-black p-6 bg-white mb-8">
           <h2 className="text-2xl font-bold font-mono mb-4">Tokenomics</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono">
             <div className="border border-gray-300 p-4">
               <span className="text-gray-600">Total Supply:</span>
-              <p className="font-bold">TBA</p>
+              <p className="font-bold">1,000,000,000</p>
             </div>
             <div className="border border-gray-300 p-4">
               <span className="text-gray-600">Network:</span>
-              <p className="font-bold">TBA</p>
-            </div>
-            <div className="border border-gray-300 p-4">
-              <span className="text-gray-600">Launch Date:</span>
-              <p className="font-bold">Coming Soon</p>
-            </div>
-            <div className="border border-gray-300 p-4">
-              <span className="text-gray-600">Liquidity Lock:</span>
-              <p className="font-bold">100% Locked</p>
+              <p className="font-bold">Solana</p>
             </div>
           </div>
         </div>
