@@ -49,9 +49,9 @@ export async function GET(request: Request) {
     });
   }
 
-  const env = (request as Request & { env?: Env }).env;
+  const DB = (process.env as any).DB as D1Database | undefined;
   
-  if (!env?.DB) {
+  if (!DB) {
     return NextResponse.json(
       { error: 'Database not available' },
       { status: 503 }
@@ -68,12 +68,12 @@ export async function GET(request: Request) {
     
     const periodKey = `${startOfHour.toISOString().slice(0, 13)}`;
     
-    let period = await env.DB.prepare(
+    let period = await DB.prepare(
       'SELECT * FROM Period WHERE key = ?'
     ).bind(periodKey).first();
     
     if (!period) {
-      await env.DB.prepare(
+      await DB.prepare(
         'INSERT INTO Period (key, startsAt, endsAt) VALUES (?, ?, ?)'
       ).bind(periodKey, startOfHour.toISOString(), endOfHour.toISOString()).run();
       

@@ -45,9 +45,9 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const env = (request as NextRequest & { env?: Env }).env;
+  const DB = (process.env as any).DB as D1Database | undefined;
   
-  if (!env?.DB) {
+  if (!DB) {
     return NextResponse.json(
       { error: 'Database not available' },
       { status: 503 }
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     hourStart.setMinutes(0, 0, 0);
     const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
 
-    const voteCounts = await env.DB.prepare(
+    const voteCounts = await DB.prepare(
       `SELECT 
         s.id, s.name, s.description, s.imageUrl,
         COUNT(v.id) as voteCount,
@@ -109,9 +109,10 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const env = (request as NextRequest & { env?: Env }).env;
+  const DB = (process.env as any).DB as D1Database | undefined;
+  const KV_SESSIONS = (process.env as any).KV_SESSIONS as KVNamespace | undefined;
   
-  if (!env?.DB || !env?.KV_SESSIONS) {
+  if (!DB || !KV_SESSIONS) {
     return NextResponse.json(
       { error: 'Database not available' },
       { status: 503 }
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
   
   try {
     const cookieStore = await cookies();
-    const sessionId = cookieStore.get(env.SESSION_COOKIE_NAME || 'sb_session')?.value;
+    const sessionId = cookieStore.get('sb_session')?.value;
     
     if (!sessionId) {
       return NextResponse.json(
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const sessionData = await env.KV_SESSIONS.get(sessionId);
+    const sessionData = await KV_SESSIONS.get(sessionId);
     if (!sessionData) {
       return NextResponse.json(
         { error: 'Invalid session' },
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest) {
     hourStart.setMinutes(0, 0, 0);
     const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
     
-    const existingVotes = await env.DB.prepare(
+    const existingVotes = await DB.prepare(
       'SELECT COUNT(*) as count FROM Vote WHERE userId = ? AND createdAt >= ? AND createdAt < ?'
     ).bind(session.userId, hourStart.toISOString(), hourEnd.toISOString()).first();
 
@@ -164,7 +165,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already voted for this specific submission in this period
-    const existingVoteForSubmission = await env.DB.prepare(
+    const existingVoteForSubmission = await DB.prepare(
       'SELECT id FROM Vote WHERE userId = ? AND submissionId = ? AND periodKey = ?'
     ).bind(session.userId, submissionId, periodKey).first();
 
@@ -175,7 +176,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const submission = await env.DB.prepare(
+    const submission = await DB.prepare(
       'SELECT id FROM Submission WHERE id = ? AND status = ?'
     ).bind(submissionId, 'approved').first();
 
@@ -193,13 +194,13 @@ export async function POST(request: NextRequest) {
                       'unknown';
     const ipHash = await hashIP(ipAddress);
 
-    await env.DB.prepare(
+    await DB.prepare(
       `INSERT INTO Vote 
        (id, userId, submissionId, periodKey, createdAt, ipHash) 
        VALUES (?, ?, ?, ?, ?, ?)`
     ).bind(voteId, session.userId, submissionId, periodKey, now, ipHash).run();
 
-    const voteCount = await env.DB.prepare(
+    const voteCount = await DB.prepare(
       'SELECT COUNT(*) as count FROM Vote WHERE submissionId = ? AND periodKey = ?'
     ).bind(submissionId, periodKey).first();
 

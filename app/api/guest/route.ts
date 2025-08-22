@@ -59,10 +59,16 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // For production, access Cloudflare bindings through context
-  const env = (request as NextRequest & { env?: Env }).env;
+  // For production, access Cloudflare bindings through process.env
+  const DB = (process.env as any).DB as D1Database | undefined;
+  const KV_SESSIONS = (process.env as any).KV_SESSIONS as KVNamespace | undefined;
   
-  if (!env?.DB || !env?.KV_SESSIONS) {
+  if (!DB || !KV_SESSIONS) {
+    console.error('Database bindings not found:', { 
+      hasDB: !!DB, 
+      hasKV: !!KV_SESSIONS,
+      env: Object.keys(process.env || {})
+    });
     return NextResponse.json(
       { error: 'Database not available' },
       { status: 503 }
@@ -79,15 +85,15 @@ export async function POST(request: NextRequest) {
                       'unknown';
     const ipHash = await hashIP(ipAddress);
 
-    await env.DB.prepare(
+    await DB.prepare(
       'INSERT INTO User (id, kind, createdAt) VALUES (?, ?, ?)'
     ).bind(userId, 'guest', now).run();
 
-    await env.DB.prepare(
+    await DB.prepare(
       'INSERT INTO Session (id, userId, createdAt, lastSeenAt, ipHash) VALUES (?, ?, ?, ?, ?)'
     ).bind(sessionId, userId, now, now, ipHash).run();
 
-    await env.KV_SESSIONS.put(sessionId, JSON.stringify({
+    await KV_SESSIONS.put(sessionId, JSON.stringify({
       userId,
       createdAt: now,
       lastSeenAt: now,
@@ -95,7 +101,7 @@ export async function POST(request: NextRequest) {
     }), { expirationTtl: 86400 * 30 });
 
     const cookieStore = await cookies();
-    cookieStore.set(env.SESSION_COOKIE_NAME || 'sb_session', sessionId, {
+    cookieStore.set('sb_session', sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

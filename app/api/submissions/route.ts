@@ -50,9 +50,9 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const env = (request as NextRequest & { env?: Env }).env;
+  const DB = (process.env as any).DB as D1Database | undefined;
   
-  if (!env?.DB) {
+  if (!DB) {
     return NextResponse.json(
       { error: 'Database not available' },
       { status: 503 }
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(url.searchParams.get('limit') || '50');
     const offset = parseInt(url.searchParams.get('offset') || '0');
     
-    const submissions = await env.DB.prepare(
+    const submissions = await DB.prepare(
       `SELECT 
         s.id, s.name, s.description, s.imageUrl, s.vectorJson, 
         s.createdAt, s.status, u.alias as userAlias
@@ -100,9 +100,10 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const env = (request as NextRequest & { env?: Env }).env;
+  const DB = (process.env as any).DB as D1Database | undefined;
+  const KV_SESSIONS = (process.env as any).KV_SESSIONS as KVNamespace | undefined;
   
-  if (!env?.DB || !env?.KV_SESSIONS) {
+  if (!DB || !KV_SESSIONS) {
     return NextResponse.json(
       { error: 'Database not available' },
       { status: 503 }
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
   
   try {
     const cookieStore = await cookies();
-    const sessionId = cookieStore.get(env.SESSION_COOKIE_NAME || 'sb_session')?.value;
+    const sessionId = cookieStore.get('sb_session')?.value;
     
     if (!sessionId) {
       return NextResponse.json(
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const sessionData = await env.KV_SESSIONS.get(sessionId);
+    const sessionData = await KV_SESSIONS.get(sessionId);
     if (!sessionData) {
       return NextResponse.json(
         { error: 'Invalid session' },
@@ -150,7 +151,7 @@ export async function POST(request: NextRequest) {
     hourStart.setMinutes(0, 0, 0);
     const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
     
-    const existingSubmissions = await env.DB.prepare(
+    const existingSubmissions = await DB.prepare(
       'SELECT COUNT(*) as count FROM Submission WHERE userId = ? AND createdAt >= ? AND createdAt < ?'
     ).bind(session.userId, hourStart.toISOString(), hourEnd.toISOString()).first();
 
@@ -164,9 +165,9 @@ export async function POST(request: NextRequest) {
     const submissionId = crypto.randomUUID();
     const now = new Date().toISOString();
     
-    const imageUrl = await uploadToStorage(imageData, submissionId, env);
+    const imageUrl = await uploadToStorage(imageData, submissionId, { DB, KV_SESSIONS } as Env);
 
-    await env.DB.prepare(
+    await DB.prepare(
       `INSERT INTO Submission 
        (id, userId, name, description, imageUrl, vectorJson, createdAt, status) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
