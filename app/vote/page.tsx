@@ -43,15 +43,25 @@ export default function VotePage() {
   const fetchUserVotes = useCallback(async () => {
     if (!period) return;
     
+    console.log('🔍 Fetching user votes for period:', period.key);
     try {
       const response = await fetch(`/api/user/votes?period=${period.key}`);
+      console.log('📊 User votes response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('📊 User votes data:', data);
         setVotesRemaining(data.votesRemaining);
         setVotedSubmissionIds(data.votedSubmissionIds || []);
+        console.log('📊 Set votes remaining to:', data.votesRemaining);
+        console.log('📊 Set voted submission IDs to:', data.votedSubmissionIds);
+      } else {
+        console.error('❌ Failed to fetch user votes - status:', response.status);
+        const errorText = await response.text();
+        console.error('❌ Error response:', errorText);
       }
     } catch (error) {
-      console.error('Failed to fetch user votes:', error);
+      console.error('❌ Failed to fetch user votes:', error);
     }
   }, [period]);
 
