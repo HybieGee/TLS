@@ -374,7 +374,6 @@ export function WavingPencil3D() {
       setCurrentFrame((prev) => {
         // Skip problematic frames - avoid frame 1 after 16
         const nextFrame = prev >= 16 ? 2 : prev + 1;
-        console.log('Frame:', nextFrame); // Debug log
         return nextFrame;
       });
     }, 150); // 150ms per frame for clear animation

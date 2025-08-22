@@ -37,15 +37,18 @@ interface KVNamespace {
 }
 
 export async function POST(request: NextRequest) {
-  // For development, return a mock response
-  if (process.env.NODE_ENV === 'development') {
+  // For production, access Cloudflare bindings through context
+  const env = (request as NextRequest & { env?: Env }).env;
+  
+  // If no database available (dev or production without DB), use mock response
+  if (!env?.DB || !env?.KV_SESSIONS) {
     const userId = crypto.randomUUID();
     const sessionId = crypto.randomUUID();
     
     const cookieStore = await cookies();
     cookieStore.set('sb_session', sessionId, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 86400 * 30,
       path: '/'
@@ -57,16 +60,6 @@ export async function POST(request: NextRequest) {
       sessionId,
       kind: 'guest'
     });
-  }
-
-  // For production, access Cloudflare bindings through context
-  const env = (request as NextRequest & { env?: Env }).env;
-  
-  if (!env?.DB || !env?.KV_SESSIONS) {
-    return NextResponse.json(
-      { error: 'Database not available' },
-      { status: 503 }
-    );
   }
   
   try {
