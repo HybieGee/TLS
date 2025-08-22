@@ -105,15 +105,6 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // For development, return success without database interaction
-  if (process.env.NODE_ENV === 'development') {
-    return NextResponse.json({
-      success: true,
-      voteId: crypto.randomUUID(),
-      submissionId: 'mock',
-      totalVotes: 1
-    });
-  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const DB = (process.env as any).DB as D1Database | undefined;
@@ -128,12 +119,15 @@ export async function POST(request: NextRequest) {
   }
   
   try {
+    console.log('POST /api/votes - Starting vote submission');
+    
     const cookieStore = await cookies();
     const sessionId = cookieStore.get('sb_session')?.value;
     
     console.log('POST votes debug - sessionId:', sessionId);
     
     if (!sessionId) {
+      console.log('POST votes error - No session ID');
       return NextResponse.json(
         { error: 'Not authenticated' },
         { status: 401 }
@@ -141,8 +135,9 @@ export async function POST(request: NextRequest) {
     }
 
     const sessionData = await KV_SESSIONS.get(sessionId);
-    console.log('POST votes debug - sessionData:', !!sessionData);
+    console.log('POST votes debug - sessionData found:', !!sessionData);
     if (!sessionData) {
+      console.log('POST votes error - Invalid session data');
       return NextResponse.json(
         { error: 'Invalid session' },
         { status: 401 }
@@ -150,9 +145,14 @@ export async function POST(request: NextRequest) {
     }
 
     const session = JSON.parse(sessionData);
-    const { submissionId, periodKey } = await request.json();
+    console.log('POST votes debug - session parsed, userId:', session.userId);
+    
+    const requestBody = await request.json();
+    console.log('POST votes debug - request body:', requestBody);
+    const { submissionId, periodKey } = requestBody;
     
     if (!submissionId || !periodKey) {
+      console.log('POST votes error - Missing required fields:', { submissionId: !!submissionId, periodKey: !!periodKey });
       return NextResponse.json(
         { error: 'Submission ID and period key are required' },
         { status: 400 }
@@ -164,11 +164,16 @@ export async function POST(request: NextRequest) {
     hourStart.setMinutes(0, 0, 0);
     const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
     
+    console.log('POST votes debug - Checking existing votes for hour:', { hourStart: hourStart.toISOString(), hourEnd: hourEnd.toISOString() });
+    
     const existingVotes = await DB.prepare(
       'SELECT COUNT(*) as count FROM Vote WHERE userId = ? AND createdAt >= ? AND createdAt < ?'
     ).bind(session.userId, hourStart.toISOString(), hourEnd.toISOString()).first();
 
+    console.log('POST votes debug - Existing votes this hour:', existingVotes?.count || 0);
+
     if (existingVotes && Number(existingVotes.count) >= 3) {
+      console.log('POST votes error - Vote limit reached');
       return NextResponse.json(
         { error: 'You have reached the maximum of 3 votes per hour' },
         { status: 400 }
@@ -176,22 +181,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already voted for this specific submission in this period
+    console.log('POST votes debug - Checking if already voted for submission:', submissionId);
     const existingVoteForSubmission = await DB.prepare(
       'SELECT id FROM Vote WHERE userId = ? AND submissionId = ? AND periodKey = ?'
     ).bind(session.userId, submissionId, periodKey).first();
 
     if (existingVoteForSubmission) {
+      console.log('POST votes error - Already voted for this submission');
       return NextResponse.json(
         { error: 'You have already voted for this submission' },
         { status: 400 }
       );
     }
 
+    console.log('POST votes debug - Checking submission exists:', submissionId);
     const submission = await DB.prepare(
       'SELECT id FROM Submission WHERE id = ? AND status = ?'
     ).bind(submissionId, 'approved').first();
 
     if (!submission) {
+      console.log('POST votes error - Submission not found or not approved');
       return NextResponse.json(
         { error: 'Invalid submission' },
         { status: 400 }
@@ -200,20 +209,22 @@ export async function POST(request: NextRequest) {
 
     const voteId = crypto.randomUUID();
     const now = new Date().toISOString();
-    const ipAddress = request.headers.get('x-forwarded-for') || 
-                      request.headers.get('x-real-ip') || 
-                      'unknown';
-    const ipHash = await hashIP(ipAddress);
 
-    await DB.prepare(
+    console.log('POST votes debug - Inserting vote:', { voteId, userId: session.userId, submissionId, periodKey, now });
+
+    const insertResult = await DB.prepare(
       `INSERT INTO Vote 
-       (id, userId, submissionId, periodKey, createdAt, ipHash) 
-       VALUES (?, ?, ?, ?, ?, ?)`
-    ).bind(voteId, session.userId, submissionId, periodKey, now, ipHash).run();
+       (id, userId, submissionId, periodKey, createdAt) 
+       VALUES (?, ?, ?, ?, ?)`
+    ).bind(voteId, session.userId, submissionId, periodKey, now).run();
+
+    console.log('POST votes debug - Insert result:', insertResult);
 
     const voteCount = await DB.prepare(
       'SELECT COUNT(*) as count FROM Vote WHERE submissionId = ? AND periodKey = ?'
     ).bind(submissionId, periodKey).first();
+
+    console.log('POST votes debug - Final vote count:', voteCount);
 
     return NextResponse.json({
       success: true,
@@ -230,10 +241,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function hashIP(ip: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(ip);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
