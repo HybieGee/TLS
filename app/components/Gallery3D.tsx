@@ -264,10 +264,9 @@ function InteractiveArtwork006() {
           center
           distanceFactor={10}
         >
-          <div className="bg-white border-2 border-black px-4 py-2 font-mono text-sm pointer-events-none shadow-lg">
-            🪙 About Me
-            <br />
-            <span className="text-xs text-gray-600">Press E to interact</span>
+          <div className="bg-white border-2 border-black px-3 py-2 font-mono text-xs pointer-events-none">
+            <div className="text-black font-bold">ABOUT ME</div>
+            <div className="text-gray-700 mt-1">Press E to interact</div>
           </div>
         </Html>
       )}
