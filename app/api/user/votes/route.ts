@@ -79,6 +79,7 @@ export async function GET(request: NextRequest) {
     ).bind(session.userId, periodKey).all();
 
     const votedSubmissionIds = (votedSubmissions.results || []).map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (vote: any) => vote.submissionId
     );
 
