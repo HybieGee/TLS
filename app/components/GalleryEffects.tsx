@@ -16,14 +16,14 @@ function useGalleryAudio() {
     if (musicRef.current) return;
     
     // Create audio element for the gallery music
-    const music = new Audio('/audio/gallery-music.mp3');
+    const music = new Audio('/audio/music.mp3');
     music.loop = true;
-    music.volume = 0.01; // Set to 1% volume
+    music.volume = 0.02; // Set to 2% volume
     musicRef.current = music;
     
     try {
       await music.play();
-      console.log('Gallery music started at 30% volume');
+      console.log('Gallery music started at 2% volume');
     } catch (error) {
       console.log('Could not play music:', error);
     }
