@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-interface Env {
-  DB: D1Database;
-}
 
 interface D1Database {
   prepare: (query: string) => D1PreparedStatement;
@@ -29,14 +26,29 @@ interface D1ResultSet {
 }
 
 export async function GET(request: NextRequest) {
-  const env = process.env as unknown as Env;
+  // For development, return mock data
+  if (process.env.NODE_ENV === 'development') {
+    return NextResponse.json({
+      winners: []
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const DB = (process.env as any).DB as D1Database | undefined;
+  
+  if (!DB) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
+  }
   
   try {
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get('limit') || '50');
     const offset = parseInt(url.searchParams.get('offset') || '0');
     
-    const winners = await env.DB.prepare(
+    const winners = await DB.prepare(
       `SELECT 
         w.id, w.submissionId, w.periodKey, w.createdAt, 
         w.votesAtWin, w.spawnX, w.spawnY, w.behavior,

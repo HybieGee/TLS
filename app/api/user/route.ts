@@ -3,11 +3,6 @@ import { cookies } from 'next/headers';
 
 export const runtime = 'edge';
 
-interface Env {
-  DB: D1Database;
-  KV_SESSIONS: KVNamespace;
-  SESSION_COOKIE_NAME?: string;
-}
 
 interface D1Database {
   prepare: (query: string) => D1PreparedStatement;
@@ -37,24 +32,47 @@ interface KVNamespace {
 }
 
 export async function GET() {
-  const env = process.env as unknown as Env;
+  // For development, return mock user data
+  if (process.env.NODE_ENV === 'development') {
+    return NextResponse.json({
+      authenticated: true,
+      user: {
+        id: 'dev-user',
+        kind: 'guest',
+        alias: null,
+        createdAt: new Date().toISOString()
+      }
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const DB = (process.env as any).DB as D1Database | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const KV_SESSIONS = (process.env as any).KV_SESSIONS as KVNamespace | undefined;
+  
+  if (!DB || !KV_SESSIONS) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
+  }
   
   try {
     const cookieStore = await cookies();
-    const sessionId = cookieStore.get(env.SESSION_COOKIE_NAME || 'sb_session')?.value;
+    const sessionId = cookieStore.get('sb_session')?.value;
     
     if (!sessionId) {
       return NextResponse.json({ authenticated: false });
     }
 
-    const sessionData = await env.KV_SESSIONS.get(sessionId);
+    const sessionData = await KV_SESSIONS.get(sessionId);
     if (!sessionData) {
       return NextResponse.json({ authenticated: false });
     }
 
     const session = JSON.parse(sessionData);
     
-    const userResult = await env.DB.prepare(
+    const userResult = await DB.prepare(
       'SELECT id, kind, alias, createdAt, banned FROM User WHERE id = ?'
     ).bind(session.userId).first();
 
@@ -63,12 +81,12 @@ export async function GET() {
     }
 
     const now = new Date().toISOString();
-    await env.DB.prepare(
+    await DB.prepare(
       'UPDATE Session SET lastSeenAt = ? WHERE id = ?'
     ).bind(now, sessionId).run();
     
     session.lastSeenAt = now;
-    await env.KV_SESSIONS.put(sessionId, JSON.stringify(session), { 
+    await KV_SESSIONS.put(sessionId, JSON.stringify(session), { 
       expirationTtl: 86400 * 30 
     });
 
