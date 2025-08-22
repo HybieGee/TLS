@@ -42,14 +42,21 @@ interface R2Bucket {
 }
 
 export async function GET(request: NextRequest) {
-  const env = (request as NextRequest & { env?: Env }).env;
-  
-  // If no database available (dev or production without DB), return empty data
-  if (!env?.DB) {
+  // For development, return mock data
+  if (process.env.NODE_ENV === 'development') {
     return NextResponse.json({
       submissions: [],
       total: 0
     });
+  }
+
+  const env = (request as NextRequest & { env?: Env }).env;
+  
+  if (!env?.DB) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
   }
   
   try {
@@ -83,16 +90,23 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const env = (request as NextRequest & { env?: Env }).env;
-  
-  // If no database available (dev or production without DB), return success mock
-  if (!env?.DB || !env?.KV_SESSIONS) {
+  // For development, return success without database interaction
+  if (process.env.NODE_ENV === 'development') {
     return NextResponse.json({
       success: true,
       submissionId: crypto.randomUUID(),
       status: 'approved',
       message: 'Character submitted successfully!'
     });
+  }
+
+  const env = (request as NextRequest & { env?: Env }).env;
+  
+  if (!env?.DB || !env?.KV_SESSIONS) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
   }
   
   try {

@@ -37,14 +37,21 @@ interface KVNamespace {
 }
 
 export async function GET(request: NextRequest) {
-  const env = (request as NextRequest & { env?: Env }).env;
-  
-  // If no database available (dev or production without DB), return empty data
-  if (!env?.DB) {
+  // For development, return mock data
+  if (process.env.NODE_ENV === 'development') {
     return NextResponse.json({
       period: 'mock',
       submissions: []
     });
+  }
+
+  const env = (request as NextRequest & { env?: Env }).env;
+  
+  if (!env?.DB) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
   }
   
   try {
@@ -92,16 +99,23 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const env = (request as NextRequest & { env?: Env }).env;
-  
-  // If no database available (dev or production without DB), return success mock
-  if (!env?.DB || !env?.KV_SESSIONS) {
+  // For development, return success without database interaction
+  if (process.env.NODE_ENV === 'development') {
     return NextResponse.json({
       success: true,
       voteId: crypto.randomUUID(),
       submissionId: 'mock',
       totalVotes: 1
     });
+  }
+
+  const env = (request as NextRequest & { env?: Env }).env;
+  
+  if (!env?.DB || !env?.KV_SESSIONS) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
   }
   
   try {

@@ -20,8 +20,8 @@ compatibility_flags = ["nodejs_compat"]
 
 [[env.production.d1_databases]]
 binding = "DB"
-database_name = "sketchbook-db"
-database_id = "551d4368-139d-4a84-bf90-609b7b8fae3e"
+database_name = "living-sketchbook-db"
+database_id = "5960c5db-0066-47dc-a8f8-dda8b89873fb"
 
 [[env.production.kv_namespaces]]
 binding = "KV_SESSIONS"
