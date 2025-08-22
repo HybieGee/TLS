@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { resolvePeriodDirectly } from '../../../lib/gallery-resolver';
+import { resolvePeriodDirectly } from '@/lib/gallery-resolver';
 
 export const runtime = 'edge';
 

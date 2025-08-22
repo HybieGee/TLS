@@ -30,7 +30,7 @@ interface D1Result {
   meta: Record<string, unknown>;
 }
 
-export async function resolvePeriodDirectly(DB: D1Database, periodKey: string): Promise<{success: boolean, error?: string, result?: any}> {
+export async function resolvePeriodDirectly(DB: D1Database, periodKey: string): Promise<{success: boolean, error?: string, result?: unknown}> {
   try {
     console.log('🏆 Resolving period directly:', periodKey);
 
