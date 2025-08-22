@@ -37,7 +37,22 @@ interface KVNamespace {
 }
 
 export async function GET(request: NextRequest) {
-  const env = process.env as unknown as Env;
+  // For development, return mock data
+  if (process.env.NODE_ENV === 'development') {
+    return NextResponse.json({
+      period: 'mock',
+      submissions: []
+    });
+  }
+
+  const env = (request as NextRequest & { env?: Env }).env;
+  
+  if (!env?.DB) {
+    return NextResponse.json(
+      { error: 'Database not available' },
+      { status: 503 }
+    );
+  }
   
   try {
     const url = new URL(request.url);
@@ -50,6 +65,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Calculate the current hour's time range
+    const now = new Date();
+    const hourStart = new Date(now);
+    hourStart.setMinutes(0, 0, 0);
+    const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
+
     const voteCounts = await env.DB.prepare(
       `SELECT 
         s.id, s.name, s.description, s.imageUrl,
@@ -59,9 +80,10 @@ export async function GET(request: NextRequest) {
        LEFT JOIN Vote v ON s.id = v.submissionId AND v.periodKey = ?
        LEFT JOIN User u ON s.userId = u.id
        WHERE s.status = 'approved'
+       AND s.createdAt >= ? AND s.createdAt < ?
        GROUP BY s.id
        ORDER BY voteCount DESC`
-    ).bind(periodKey).all();
+    ).bind(periodKey, hourStart.toISOString(), hourEnd.toISOString()).all();
 
     return NextResponse.json({
       period: periodKey,
