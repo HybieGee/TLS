@@ -40,6 +40,21 @@ export default function VotePage() {
     }
   }, []);
 
+  const fetchUserVotes = useCallback(async () => {
+    if (!period) return;
+    
+    try {
+      const response = await fetch(`/api/user/votes?period=${period.key}`);
+      if (response.ok) {
+        const data = await response.json();
+        setVotesRemaining(data.votesRemaining);
+        setVotedSubmissionIds(data.votedSubmissionIds || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user votes:', error);
+    }
+  }, [period]);
+
   const fetchSubmissions = useCallback(async () => {
     if (!period) return;
     
@@ -61,8 +76,9 @@ export default function VotePage() {
   useEffect(() => {
     if (period) {
       fetchSubmissions();
+      fetchUserVotes();
     }
-  }, [period, fetchSubmissions]);
+  }, [period, fetchSubmissions, fetchUserVotes]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -79,8 +95,7 @@ export default function VotePage() {
       if (remaining === 0) {
         setTimeout(() => {
           fetchCurrentPeriod();
-          setVotedSubmissionIds([]);
-          setVotesRemaining(3);
+          // fetchUserVotes will be called when period updates
         }, 2000);
       }
     }, 1000);
