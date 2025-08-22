@@ -17,7 +17,7 @@ interface D1ResultSet {
   meta: Record<string, unknown>;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const DB = (process.env as any).DB as D1Database | undefined;
   
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         END
     `).all();
 
-    const positions = galleryState.results.map((row: any) => ({
+    const positions = galleryState.results.map((row: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
       position: row.position,
       submissionId: row.submissionId,
       periodKey: row.periodKey,

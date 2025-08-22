@@ -277,6 +277,7 @@ function InteractiveArtwork006() {
 // Blender Gallery Component with Sketchbook Outlines and Coming Soon Textures
 function BlenderGallery() {
   const { scene } = useGLTF('/models/Gallery.glb');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [galleryState, setGalleryState] = useState<any>(null);
   
   // Load Coming Soon texture - your awesome sketch!
@@ -338,6 +339,7 @@ function BlenderGallery() {
         const childNameLower = child.name.toLowerCase();
         
         // Check if this position has a winner artwork
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const galleryPosition = galleryState?.find((pos: any) => 
           pos.position.toLowerCase() === child.name.toLowerCase()
         );

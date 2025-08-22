@@ -79,6 +79,7 @@ export async function GET() {
 
       // Resolve previous periods
       for (const unresolvedPeriod of unresolved.results) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const period = unresolvedPeriod as any;
         console.log('🕐 Auto-resolving expired period:', period.key);
         await resolvePeriodIfNeeded(DB, period.key);
@@ -97,6 +98,7 @@ export async function GET() {
       };
     } else {
       // Check if current period has ended and needs resolution
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const periodData = period as any;
       if (!periodData.resolvedAt && new Date(periodData.endsAt) <= now) {
         console.log('⏰ Current period has ended, resolving:', periodKey);

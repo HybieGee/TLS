@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const winner = winnerResult as any;
     console.log('🥇 Winner found:', winner.name, 'with', winner.voteCount, 'votes');
 
@@ -93,6 +94,7 @@ export async function POST(request: NextRequest) {
     console.log('🖼️ Deploying to position:', nextPosition);
 
     // Check if there's currently an artwork at this position
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const currentArtwork = await DB.prepare(
       'SELECT submissionId, periodKey FROM GalleryPosition WHERE position = ?'
     ).bind(nextPosition).first() as any;
@@ -101,12 +103,8 @@ export async function POST(request: NextRequest) {
     if (currentArtwork?.submissionId) {
       console.log('📦 Archiving current artwork at position:', nextPosition);
       
-      // Get the current artwork's details for archiving
-      const currentSubmission = await DB.prepare(
-        'SELECT name, userId FROM Submission WHERE id = ?'
-      ).bind(currentArtwork.submissionId).first() as any;
-
       // Get the vote count for the artwork being archived
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const currentVoteCount = await DB.prepare(
         'SELECT COUNT(*) as count FROM Vote WHERE submissionId = ? AND periodKey = ?'
       ).bind(currentArtwork.submissionId, currentArtwork.periodKey).first() as any;
