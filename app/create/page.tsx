@@ -172,7 +172,7 @@ export default function CreatePage() {
                   onChange={(e) => setBrushSize(Number(e.target.value))}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs font-mono text-gray-600 mt-1">
+                <div className="flex justify-between text-xs font-mono text-black mt-1">
                   <span>1px</span>
                   <span>50px</span>
                 </div>
@@ -190,7 +190,7 @@ export default function CreatePage() {
                   onChange={(e) => setOpacity(Number(e.target.value))}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs font-mono text-gray-600 mt-1">
+                <div className="flex justify-between text-xs font-mono text-black mt-1">
                   <span>10%</span>
                   <span>100%</span>
                 </div>
@@ -249,7 +249,7 @@ export default function CreatePage() {
               >
                 🔄 Reset Tools
               </button>
-              <span className="px-4 py-2 font-mono text-sm text-gray-600 flex items-center">
+              <span className="px-4 py-2 font-mono text-sm text-black flex items-center">
                 Black ink only • Click and drag to draw • Use tools above
               </span>
             </div>
@@ -268,7 +268,7 @@ export default function CreatePage() {
                 className="w-full px-3 py-2 border-2 border-black font-mono"
                 placeholder="Enter character name..."
               />
-              <div className="text-xs font-mono text-gray-500 mt-1">
+              <div className="text-xs font-mono text-black opacity-75 mt-1">
                 {characterName.length}/40 characters
               </div>
             </div>
@@ -284,7 +284,7 @@ export default function CreatePage() {
                 rows={3}
                 placeholder="Describe your character..."
               />
-              <div className="text-xs font-mono text-gray-500 mt-1">
+              <div className="text-xs font-mono text-black opacity-75 mt-1">
                 {description.length}/200 characters
               </div>
             </div>

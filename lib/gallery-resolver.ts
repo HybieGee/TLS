@@ -94,17 +94,29 @@ export async function resolvePeriodDirectly(DB: D1Database, periodKey: string): 
       console.log('✅ Archived previous winner');
     }
 
-    // Deploy the new winner to the gallery position
-    await DB.prepare(`
-      UPDATE GalleryPosition 
-      SET submissionId = ?, periodKey = ?, deployedAt = ?
-      WHERE position = ?
-    `).bind(
-      winner.id,
-      periodKey,
-      new Date().toISOString(),
-      nextPosition
-    ).run();
+    // Check if gallery position exists, create if not
+    const positionExists = await DB.prepare(
+      'SELECT position FROM GalleryPosition WHERE position = ?'
+    ).bind(nextPosition).first();
+    
+    if (!positionExists) {
+      console.log('📍 Creating gallery position:', nextPosition);
+      await DB.prepare(
+        'INSERT INTO GalleryPosition (position, submissionId, periodKey, deployedAt) VALUES (?, ?, ?, ?)'
+      ).bind(nextPosition, winner.id, periodKey, new Date().toISOString()).run();
+    } else {
+      // Deploy the new winner to the gallery position
+      await DB.prepare(`
+        UPDATE GalleryPosition 
+        SET submissionId = ?, periodKey = ?, deployedAt = ?
+        WHERE position = ?
+      `).bind(
+        winner.id,
+        periodKey,
+        new Date().toISOString(),
+        nextPosition
+      ).run();
+    }
 
     // Mark the period as resolved
     await DB.prepare(

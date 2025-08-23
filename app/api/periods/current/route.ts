@@ -68,20 +68,20 @@ export async function GET() {
       'SELECT * FROM Period WHERE key = ?'
     ).bind(periodKey).first();
     
+    // ALWAYS check for unresolved previous periods first
+    const unresolved = await DB.prepare(
+      'SELECT key, endsAt FROM Period WHERE resolvedAt IS NULL AND endsAt < ? ORDER BY endsAt DESC LIMIT 10'
+    ).bind(now.toISOString()).all();
+
+    // Resolve ALL previous periods that have ended
+    for (const unresolvedPeriod of unresolved.results) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const period = unresolvedPeriod as any;
+      console.log('🕐 Auto-resolving expired period:', period.key);
+      await resolvePeriodIfNeeded(DB, period.key);
+    }
+    
     if (!period) {
-      // Check if there are any unresolved previous periods and resolve them
-      const unresolved = await DB.prepare(
-        'SELECT key, endsAt FROM Period WHERE resolvedAt IS NULL AND endsAt < ? ORDER BY endsAt DESC LIMIT 5'
-      ).bind(now.toISOString()).all();
-
-      // Resolve previous periods
-      for (const unresolvedPeriod of unresolved.results) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const period = unresolvedPeriod as any;
-        console.log('🕐 Auto-resolving expired period:', period.key);
-        await resolvePeriodIfNeeded(DB, period.key);
-      }
-
       await DB.prepare(
         'INSERT INTO Period (key, startsAt, endsAt) VALUES (?, ?, ?)'
       ).bind(periodKey, startOfHour.toISOString(), endOfHour.toISOString()).run();

@@ -180,13 +180,13 @@ export default function VotePage() {
         
         {loading ? (
           <div className="border-2 border-black p-8 bg-white mb-8">
-            <p className="text-lg font-mono text-gray-700">
+            <p className="text-lg font-mono text-black">
               Loading submissions...
             </p>
           </div>
         ) : submissions.length === 0 ? (
           <div className="border-2 border-black p-8 bg-white mb-8">
-            <p className="text-lg font-mono text-gray-700 mb-4">
+            <p className="text-lg font-mono text-black mb-4">
               No submissions yet for this voting period.
             </p>
             <Link href="/create" className="font-mono underline text-blue-600">
@@ -215,11 +215,11 @@ export default function VotePage() {
                   )}
                 </div>
                 <h3 className="font-mono font-bold text-lg mb-2">{submission.name}</h3>
-                <p className="font-mono text-sm text-gray-600 mb-2">
+                <p className="font-mono text-sm text-black mb-2">
                   {submission.description}
                 </p>
                 {submission.userAlias && (
-                  <p className="font-mono text-xs text-gray-500 mb-4">
+                  <p className="font-mono text-xs text-black opacity-75 mb-4">
                     by {submission.userAlias}
                   </p>
                 )}
@@ -232,7 +232,7 @@ export default function VotePage() {
                       votedSubmissionIds.includes(submission.id)
                         ? 'bg-green-500 text-white'
                         : votesRemaining <= 0
-                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        ? 'bg-gray-200 text-black opacity-75 cursor-not-allowed'
                         : 'bg-white hover:bg-black hover:text-white cursor-pointer'
                     }`}
                   >
