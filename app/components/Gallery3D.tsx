@@ -210,16 +210,48 @@ function MovementControls({ sendPosition }: { sendPosition?: (position: [number,
   return null;
 }
 
-// Interactive Artwork006 Component
+// Interactive Artwork006 Component with Video
 function InteractiveArtwork006() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [isNear, setIsNear] = useState(false);
   const { camera } = useThree();
   const router = useRouter();
   const meshRef = useRef<THREE.Mesh>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoTexture, setVideoTexture] = useState<THREE.VideoTexture | null>(null);
   
   // Position for Artwork006 - right side of gallery
   const artwork006Position = new THREE.Vector3(10, 2, 2);
+  
+  // Initialize video texture
+  useEffect(() => {
+    const video = document.createElement('video');
+    video.src = '/images/Logo.mp4';
+    video.loop = true;
+    video.muted = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.crossOrigin = 'anonymous';
+    
+    video.addEventListener('loadeddata', () => {
+      const texture = new THREE.VideoTexture(video);
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = false;
+      setVideoTexture(texture);
+    });
+    
+    video.load();
+    videoRef.current = video;
+    
+    return () => {
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.src = '';
+        videoRef.current.load();
+      }
+    };
+  }, []);
   
   useFrame(() => {
     const distance = camera.position.distanceTo(artwork006Position);
@@ -233,6 +265,13 @@ function InteractiveArtwork006() {
       } else {
         setShowTooltip(false);
       }
+    }
+    
+    // Ensure video keeps playing
+    if (videoRef.current && videoRef.current.paused) {
+      videoRef.current.play().catch(() => {
+        // Ignore autoplay errors
+      });
     }
   });
 
@@ -256,7 +295,11 @@ function InteractiveArtwork006() {
       position={[10, 2, 2]} 
     >
       <boxGeometry args={[2, 1.5, 0.1]} />
-      <meshBasicMaterial transparent opacity={0} />
+      {videoTexture ? (
+        <meshBasicMaterial map={videoTexture} />
+      ) : (
+        <meshBasicMaterial color="#333333" />
+      )}
       
       {showTooltip && (
         <Html
@@ -398,7 +441,7 @@ function BlenderGallery() {
             color: 0xffffff // Full brightness, unaffected by lighting
           });
           child.material = newMaterial;
-          }
+        }
         }
         
         // Apply color fix to other artwork meshes to prevent fading
