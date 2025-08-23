@@ -399,7 +399,7 @@ function BlenderGallery() {
         
         if (isComingSoonArtwork) {
           if (galleryPosition?.artwork?.imageUrl) {
-            // Apply winner artwork texture
+            // Apply winner artwork texture immediately
             console.log('🏆 Applying winner texture to:', child.name, galleryPosition.artwork.name);
             
             const winnerTexture = new THREE.TextureLoader().load(galleryPosition.artwork.imageUrl);
@@ -415,7 +415,7 @@ function BlenderGallery() {
               color: 0xffffff
             });
             child.material = newMaterial;
-          } else if (comingSoonTexture) {
+          } else if (comingSoonTexture && !galleryPosition) {
             // Apply Coming Soon texture as fallback
             console.log('✅ Applying Coming Soon texture to:', child.name);
             const rotatedTexture = comingSoonTexture.clone();
