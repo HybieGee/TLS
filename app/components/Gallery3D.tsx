@@ -415,7 +415,7 @@ function BlenderGallery() {
               color: 0xffffff
             });
             child.material = newMaterial;
-          } else if (comingSoonTexture && !galleryPosition) {
+          } else if (comingSoonTexture) {
             // Apply Coming Soon texture as fallback
             console.log('✅ Applying Coming Soon texture to:', child.name);
             const rotatedTexture = comingSoonTexture.clone();
