@@ -457,22 +457,33 @@ function BlenderGallery() {
           child.material = videoMaterial;
         }
         
-        // Apply color fix to other artwork meshes to prevent fading
+        // Fix faded appearance for Trump, Elon, Bonk, and Pump artworks
         const isOtherArtwork = childNameLower === 'trump_artwork' ||
                               childNameLower === 'elon_artwork' ||
                               childNameLower === 'bonk_artwork' ||
                               childNameLower === 'pump_artwork';
                               
         if (isOtherArtwork) {
-          console.log('🎨 Applying color fix to:', child.name);
-          // Fix faded colors by ensuring full brightness
-          if (child.material instanceof THREE.MeshStandardMaterial) {
-            child.material.color.setHex(0xffffff); // Full white for brightness
-            child.material.needsUpdate = true;
-          } else if (child.material instanceof THREE.MeshBasicMaterial) {
-            child.material.color.setHex(0xffffff);
-            child.material.needsUpdate = true;
+          console.log('🎨 Fixing faded appearance for:', child.name);
+          
+          // Get the existing texture if any
+          let existingTexture = null;
+          if (child.material) {
+            if ('map' in child.material) {
+              existingTexture = child.material.map;
+            }
           }
+          
+          // Replace with MeshBasicMaterial to avoid lighting issues
+          const newMaterial = new THREE.MeshBasicMaterial({
+            map: existingTexture,
+            color: 0xffffff,
+            side: THREE.DoubleSide,
+            transparent: false
+          });
+          
+          child.material = newMaterial;
+          child.material.needsUpdate = true;
         }
         
         // Create edges geometry with threshold for clean lines
