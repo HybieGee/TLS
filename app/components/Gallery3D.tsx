@@ -216,42 +216,9 @@ function InteractiveArtwork006() {
   const [isNear, setIsNear] = useState(false);
   const { camera } = useThree();
   const router = useRouter();
-  const meshRef = useRef<THREE.Mesh>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoTexture, setVideoTexture] = useState<THREE.VideoTexture | null>(null);
   
   // Position for Artwork006 - right side of gallery
   const artwork006Position = new THREE.Vector3(10, 2, 2);
-  
-  // Initialize video texture
-  useEffect(() => {
-    const video = document.createElement('video');
-    video.src = '/images/Logo.mp4';
-    video.loop = true;
-    video.muted = true;
-    video.autoplay = true;
-    video.playsInline = true;
-    video.crossOrigin = 'anonymous';
-    
-    video.addEventListener('loadeddata', () => {
-      const texture = new THREE.VideoTexture(video);
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      texture.generateMipmaps = false;
-      setVideoTexture(texture);
-    });
-    
-    video.load();
-    videoRef.current = video;
-    
-    return () => {
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.src = '';
-        videoRef.current.load();
-      }
-    };
-  }, []);
   
   useFrame(() => {
     const distance = camera.position.distanceTo(artwork006Position);
@@ -265,13 +232,6 @@ function InteractiveArtwork006() {
       } else {
         setShowTooltip(false);
       }
-    }
-    
-    // Ensure video keeps playing
-    if (videoRef.current && videoRef.current.paused) {
-      videoRef.current.play().catch(() => {
-        // Ignore autoplay errors
-      });
     }
   });
 
@@ -290,20 +250,10 @@ function InteractiveArtwork006() {
   }, [isNear, router]);
 
   return (
-    <mesh 
-      ref={meshRef}
-      position={[10, 2, 2]} 
-    >
-      <boxGeometry args={[2, 1.5, 0.1]} />
-      {videoTexture ? (
-        <meshBasicMaterial map={videoTexture} />
-      ) : (
-        <meshBasicMaterial color="#333333" />
-      )}
-      
+    <>
       {showTooltip && (
         <Html
-          position={[0, -0.8, 0.1]}
+          position={[10, 0.7, 2]}
           center
           distanceFactor={10}
         >
@@ -313,7 +263,7 @@ function InteractiveArtwork006() {
           </div>
         </Html>
       )}
-    </mesh>
+    </>
   );
 }
 
@@ -322,10 +272,62 @@ function BlenderGallery() {
   const { scene } = useGLTF('/models/Gallery.glb');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [galleryState, setGalleryState] = useState<any>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoTexture, setVideoTexture] = useState<THREE.VideoTexture | null>(null);
   
   // Load Coming Soon texture - your awesome sketch!
   const comingSoonTexture = useLoader(THREE.TextureLoader, '/images/coming-soon.png');
+  
+  // Initialize video texture for Artwork006
+  useEffect(() => {
+    const video = document.createElement('video');
+    video.src = '/images/Logo.mp4';
+    video.loop = true;
+    video.muted = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.crossOrigin = 'anonymous';
+    
+    const playVideo = () => {
+      video.play().catch(() => {
+        // Try again on user interaction
+        document.addEventListener('click', () => {
+          video.play().catch(() => {});
+        }, { once: true });
+      });
+    };
+    
+    video.addEventListener('loadeddata', () => {
+      const texture = new THREE.VideoTexture(video);
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = false;
+      texture.flipY = false; // Match other textures
+      setVideoTexture(texture);
+      playVideo();
+    });
+    
+    video.load();
+    videoRef.current = video;
+    
+    return () => {
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.src = '';
+        videoRef.current.load();
+      }
+    };
+  }, []);
 
+  // Keep video playing
+  useFrame(() => {
+    if (videoRef.current && videoRef.current.paused) {
+      videoRef.current.play().catch(() => {
+        // Ignore autoplay errors
+      });
+    }
+  });
+  
   // Fetch gallery state (which artworks are deployed)
   useEffect(() => {
     const fetchGalleryState = async () => {
@@ -444,12 +446,22 @@ function BlenderGallery() {
         }
         }
         
+        // Apply video texture to Artwork006
+        if (childNameLower === 'artwork006' && videoTexture) {
+          console.log('🎬 Applying video texture to Artwork006');
+          const videoMaterial = new THREE.MeshBasicMaterial({
+            map: videoTexture,
+            side: THREE.DoubleSide,
+            color: 0xffffff
+          });
+          child.material = videoMaterial;
+        }
+        
         // Apply color fix to other artwork meshes to prevent fading
         const isOtherArtwork = childNameLower === 'trump_artwork' ||
                               childNameLower === 'elon_artwork' ||
                               childNameLower === 'bonk_artwork' ||
-                              childNameLower === 'pump_artwork' ||
-                              childNameLower === 'artwork006';
+                              childNameLower === 'pump_artwork';
                               
         if (isOtherArtwork) {
           console.log('🎨 Applying color fix to:', child.name);
@@ -490,7 +502,7 @@ function BlenderGallery() {
     });
     
     return cloned;
-  }, [scene, comingSoonTexture, galleryState]);
+  }, [scene, comingSoonTexture, galleryState, videoTexture]);
   
   return <primitive object={sceneWithEdges} />;
 }
